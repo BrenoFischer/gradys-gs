@@ -11,14 +11,14 @@ class ReceiveCommandConsumer(AsyncWebsocketConsumer):
 
   async def receive(self, text_data):
     await aio_instance.write_async(text_data.encode())
-    await self.send(text_data)
+
+  async def disconnect(self, close_code):
+    print(f'Receive command websocket disconnected {close_code}')
 
 
 class ConnectionConsumer(AsyncWebsocketConsumer):
   async def connect(self):
     await self.accept()
-
-    #connect_to_esp()
 
     if connect_to_esp() == True:
       queue = asyncio.Queue()
@@ -26,10 +26,8 @@ class ConnectionConsumer(AsyncWebsocketConsumer):
       consumer = asyncio.create_task(consume(queue, self))
       await asyncio.gather(reader)
 
-
-  async def receive(self, text_data):
-    await aio_instance.write_async(text_data.encode())
-    await self.send(text_data)
+  async def disconnect(self, close_code):
+    print(f'Connection websocket disconnected {close_code}')
   
 
 async def read_json(queue):
