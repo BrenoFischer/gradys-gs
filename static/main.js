@@ -1,4 +1,5 @@
 var socket = new WebSocket('ws://localhost:8000/ws/connection/');
+var socket2 = new WebSocket('ws://localhost:8000/ws/receive/');
 
 socket.onmessage = function(e) {
   var djangoData = JSON.parse(e.data);
@@ -11,7 +12,7 @@ socket.onmessage = function(e) {
   lng = djangoData['lng']
   high = djangoData['high']
 
-  document.querySelector('#app').innerText = `{'id': '${id}', 'type': ${type}, 'count': ${count}, 'lat': ${lat}, 'lng': ${lng}}, 'high': ${high}`;
+  document.querySelector('#app').innerText = `{'id': '${id}', 'type': ${type}, 'count': ${count}, 'lat': ${lat}, 'lng': ${lng}, 'high': ${high}}`;
 }
 
 socket.onclose = function(e) {
@@ -19,13 +20,13 @@ socket.onclose = function(e) {
 };
 
 document.querySelector('#turn-on').onclick = function(e) {
-  socket.send(JSON.stringify(
+  socket2.send(JSON.stringify(
     {'id': 1, 'type': 2, 'count': 3, 'lat': -9, 'lng': 10}
   ));
 };
 
 document.querySelector('#turn-off').onclick = function(e) {
-  socket.send(JSON.stringify(
+  socket2.send(JSON.stringify(
     {'id': 1, 'type': 1, 'count': 3, 'lat': -9, 'lng': 10}
   ));
 };

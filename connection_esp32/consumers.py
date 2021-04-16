@@ -5,6 +5,15 @@ from random import randint
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 
+class ReceiveCommandConsumer(AsyncWebsocketConsumer):
+  async def connect(self):
+    await self.accept()
+
+  async def receive(self, text_data):
+    await aio_instance.write_async(text_data.encode())
+    await self.send(text_data)
+
+
 class ConnectionConsumer(AsyncWebsocketConsumer):
   async def connect(self):
     await self.accept()
