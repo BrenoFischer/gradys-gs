@@ -1,7 +1,9 @@
 import json
 import asyncio
 import aioserial
-from random import randint
+import logging
+import serial
+from datetime import datetime
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 
@@ -10,7 +12,7 @@ class ReceiveCommandConsumer(AsyncWebsocketConsumer):
     await self.accept()
 
   async def receive(self, text_data):
-    await serial.aio_instance.write_async(text_data.encode())
+    await async_serial.aio_instance.write_async(text_data.encode())
 
   async def disconnect(self, close_code):
     print(f'Receive command websocket disconnected {close_code}')
@@ -20,23 +22,32 @@ class ConnectionConsumer(AsyncWebsocketConsumer):
   async def connect(self):
     await self.accept()
 
-    serial.is_connected = serial.connect_serial()
+    time_now = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+    path = "./connection_esp32/LOGS/"
+
+    log_file_name_exc = path + f'exceptions/{time_now}.log'
+    async_serial.logger_except = async_serial.setup_logger('log_exception', log_file_name_exc, '%(lineno)d: %(asctime)s %(message)s', level=logging.ERROR)
+
+    log_file_name_info = path + f'info/{time_now}.log'
+    async_serial.logger_info = async_serial.setup_logger('log_info', log_file_name_info, '%(asctime)s %(message)s', level=logging.INFO)
+
+    async_serial.is_connected = async_serial.connect_serial()
     while True:
-      if serial.is_connected:
+      if async_serial.is_connected:
         try:
-          reader = asyncio.create_task(serial.read())
-          consumer = asyncio.create_task(serial.consume(self))
-          serial.queue = asyncio.Queue()
-          serial.tasks.extend([reader, consumer])
+          reader = asyncio.create_task(async_serial.read())
+          consumer = asyncio.create_task(async_serial.consume(self))
+          async_serial.queue = asyncio.Queue()
+          async_serial.tasks.extend([reader, consumer])
           await asyncio.gather(reader)
-          await serial.handle_disconnection_exception()
-          serial.is_connected = False
+          await async_serial.handle_disconnection_exception()
+          async_serial.is_connected = False
         except Exception as e:
           print(e)
-          await serial.handle_disconnection_exception()
-          await serial.keep_trying_connection()
+          await async_serial.handle_disconnection_exception()
+          await async_serial.keep_trying_connection()
       else:
-        await serial.keep_trying_connection()
+        await async_serial.keep_trying_connection()
 
   async def disconnect(self, close_code):
     print(f'Connection websocket disconnected {close_code}')
@@ -48,6 +59,20 @@ class SerialConnection():
     self.is_connected = False
     self.tasks = []
     self.queue = None
+    self.logger_info = None
+    self.logger_except = None
+
+
+  def setup_logger(self, name, log_file, my_format, level=logging.INFO):
+    formatter = logging.Formatter(my_format)
+    handler = logging.FileHandler(log_file)
+    handler.setFormatter(formatter)
+
+    lo = logging.getLogger(name)
+    lo.setLevel(level)
+    lo.addHandler(handler)
+
+    return lo
 
 
   async def handle_disconnection_exception(self):
@@ -70,9 +95,8 @@ class SerialConnection():
       try:
         json_line = json.loads(decoded_line)
         await self.queue.put(json_line)
-      except ValueError as e:
-        print(e)
-        print(decoded_line)
+      except ValueError:
+        self.logger_except.exception('')
 
 
   async def consume(self, obj):
@@ -80,6 +104,7 @@ class SerialConnection():
       json_consumed = await self.queue.get()
       self.queue.task_done()
       print(f'consumed {json_consumed}')
+      self.logger_info.info(json_consumed)
       await obj.send(json.dumps(json_consumed))
 
 
@@ -90,10 +115,9 @@ class SerialConnection():
       self.aio_instance.flush()
       print("Conexão estabelecida")
       return True
-    except Exception as e:
-      print("Não foi possível conectar")
-      print(e)
+    except serial.serialutil.SerialException:
+      self.logger_except.exception('')
       return False
 
 
-serial = SerialConnection()
+async_serial = SerialConnection()
