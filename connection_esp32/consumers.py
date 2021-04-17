@@ -10,7 +10,7 @@ class ReceiveCommandConsumer(AsyncWebsocketConsumer):
     await self.accept()
 
   async def receive(self, text_data):
-    await aio_instance.write_async(text_data.encode())
+    await handleConnection.aio_instance.write_async(text_data.encode())
 
   async def disconnect(self, close_code):
     print(f'Receive command websocket disconnected {close_code}')
@@ -20,47 +20,51 @@ class ConnectionConsumer(AsyncWebsocketConsumer):
   async def connect(self):
     await self.accept()
 
-    if connect_to_esp() == True:
+    if handleConnection.connect_to_esp() == True:
       queue = asyncio.Queue()
-      reader = asyncio.create_task(read_json(queue))
-      consumer = asyncio.create_task(consume(queue, self))
+      reader = asyncio.create_task(handleConnection.read_json(queue))
+      consumer = asyncio.create_task(handleConnection.consume(queue, self))
       await asyncio.gather(reader)
 
   async def disconnect(self, close_code):
     print(f'Connection websocket disconnected {close_code}')
   
 
-async def read_json(queue):
-  while True:
-    raw_data: bytes = await aio_instance.readline_async()
-    decoded_line = raw_data.decode('ascii')
+class SerialConnection():
+  def __init__(self):
+    self.aio_instance = None
+
+  async def read_json(self, queue):
+    while True:
+      raw_data: bytes = await self.aio_instance.readline_async()
+      decoded_line = raw_data.decode('ascii')
+      try:
+        json_line = json.loads(decoded_line)
+        await queue.put(json_line)
+      except ValueError as e:
+        print(e)
+        print(decoded_line)
+
+
+  async def consume(self, queue, obj):
+    while True:
+      json_consumed = await queue.get()
+      queue.task_done()
+      print(f'consumed {json_consumed}')
+      await obj.send(json.dumps(json_consumed))
+
+
+  def connect_to_esp(self):
+    print("Tentando conexão com a serial...")
     try:
-      json_line = json.loads(decoded_line)
-      await queue.put(json_line)
-    except ValueError as e:
+      self.aio_instance = aioserial.AioSerial(port='COM4', baudrate=115200)
+      self.aio_instance.flush()
+      print("Conexão estabelecida")
+      return True
+    except serial.serialutil.SerialException as e:
+      print("Não foi possível conectar")
       print(e)
-      print(decoded_line)
+      return False
 
 
-async def consume(queue, obj):
-  while True:
-    json_consumed = await queue.get()
-    queue.task_done()
-    print(f'consumed {json_consumed}')
-    await obj.send(json.dumps(json_consumed))
-
-
-def connect_to_esp():
-  print("Tentando conexão com a serial...")
-  try:
-    global aio_instance
-    aio_instance = aioserial.AioSerial(port='COM4', baudrate=115200)
-    aio_instance.flush()
-    print("Conexão estabelecida")
-    return True
-  except serial.serialutil.SerialException as e:
-    print("Não foi possível conectar")
-    print(e)
-    return False
-
-aio_instance = None
+handleConnection = SerialConnection()
