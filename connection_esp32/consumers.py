@@ -35,11 +35,7 @@ class ConnectionConsumer(AsyncWebsocketConsumer):
     while True:
       if async_serial.is_connected:
         try:
-          reader = asyncio.create_task(async_serial.read())
-          consumer = asyncio.create_task(async_serial.consume(self))
-          async_serial.queue = asyncio.Queue()
-          async_serial.tasks.extend([reader, consumer])
-          await asyncio.gather(reader)
+          await async_serial.set_tasks(self)
           await async_serial.handle_disconnection_exception()
           async_serial.is_connected = False
         except Exception as e:
@@ -73,6 +69,13 @@ class SerialConnection():
     lo.addHandler(handler)
 
     return lo
+
+  async def set_tasks(self, obj):
+    reader = asyncio.create_task(self.read())
+    consumer = asyncio.create_task(self.consume(obj))
+    self.queue = asyncio.Queue()
+    self.tasks.extend([reader, consumer])
+    await asyncio.gather(reader)
 
 
   async def handle_disconnection_exception(self):
