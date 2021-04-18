@@ -31,15 +31,12 @@ class ConnectionConsumer(AsyncWebsocketConsumer):
     log_file_name_info = path + f'info/{time_now}.log'
     async_serial.logger_info = async_serial.setup_logger('log_info', log_file_name_info, '%(asctime)s %(message)s', level=logging.INFO)
 
-    async_serial.is_connected = async_serial.connect_serial()
+    async_serial.connect_serial()
     while True:
       if async_serial.is_connected:
         try:
           await async_serial.set_tasks(self)
-          await async_serial.handle_disconnection_exception()
-          async_serial.is_connected = False
         except Exception as e:
-          print(e)
           await async_serial.handle_disconnection_exception()
           await async_serial.keep_trying_connection()
       else:
@@ -79,15 +76,15 @@ class SerialConnection():
 
 
   async def handle_disconnection_exception(self):
+    self.is_connected = False
     await self.queue.join()
     for task in self.tasks:
         task.cancel()
 
 
   async def keep_trying_connection(self):
-    self.is_connected = False
     while not self.is_connected:
-        self.is_connected = self.connect_serial()
+        self.connect_serial()
         await asyncio.sleep(3)
 
 
@@ -117,10 +114,10 @@ class SerialConnection():
       self.aio_instance = aioserial.AioSerial(port='COM4', baudrate=115200)
       self.aio_instance.flush()
       print("Conexão estabelecida")
-      return True
+      self.is_connected = True
     except serial.serialutil.SerialException:
       self.logger_except.exception('')
-      return False
+      self.is_connected = False
 
 
 async_serial = SerialConnection()
