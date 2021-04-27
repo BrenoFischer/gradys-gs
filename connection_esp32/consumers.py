@@ -21,32 +21,61 @@ class ReceiveCommandConsumer(AsyncWebsocketConsumer):
 class ConnectionConsumer(AsyncWebsocketConsumer):
   async def connect(self):
     await self.accept()
-
-    time_now = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-    path = "./connection_esp32/LOGS/"
-
-    log_file_name_exc = path + f'exceptions/{time_now}.log'
-    async_serial.logger_except = async_serial.setup_logger('log_exception', log_file_name_exc, '%(lineno)d: %(asctime)s %(message)s', level=logging.ERROR)
-
-    log_file_name_info = path + f'info/{time_now}.log'
-    async_serial.logger_info = async_serial.setup_logger('log_info', log_file_name_info, '%(asctime)s %(message)s', level=logging.INFO)
-
-    async_serial.connect_serial()
-    while True:
-      if async_serial.is_connected:
-        try:
-          await async_serial.set_tasks(self)
-        except Exception as e:
-          await async_serial.handle_disconnection_exception()
-          await async_serial.keep_trying_connection()
-      else:
-        await async_serial.keep_trying_connection()
+    async_serial.initiate_loggers()
+    await async_serial.start_serial_connection(self)
 
   async def disconnect(self, close_code):
     print(f'Connection websocket disconnected {close_code}')
-  
+
 
 class SerialConnection():
+  """
+  Attributes
+  ----------
+  aio_instance : AioSerial
+    will handle the connection, send and receive async messages
+
+  is_connected : bool
+    control the serial connection status
+
+  tasks : List(Task)
+    async methods that'll act as tasks gathered with the asyncio library
+
+  queue : Queue
+    queue of messages received from the serial
+  
+  logger_info : Logger
+    logger that'll control and generate the information log file
+
+  logger_except : Logger
+    logger that'll control and generate the exception log file
+
+
+  Methods
+  ---------
+  setup_logger(name, log_file, my_format, level=logging.INFO)
+    Return the logger, according to it's logging purpose.
+
+  set_tasks(obj)
+    Create the reader, consumer tasks, the queue and keep waiting them to finish
+
+  handle_disconnection_exception()
+    Put the connection status to false, wait for the queue to be cleared and cancel the tasks
+
+  keep_trying_connection()
+    While the serial connection is not established, keep trying connection
+
+  read()
+    Keep waiting for messages from the serial and put it in the queue
+
+  consume(obj)
+    Keep waiting for a message in the queue, put the info in the log file and send it to the client,
+    through websocket
+
+  connect_serial()
+    Try to instantiate the aioserial connector and change the serial status accordingly
+  """
+
   def __init__(self):
     self.aio_instance = None
     self.is_connected = False
@@ -57,6 +86,24 @@ class SerialConnection():
 
 
   def setup_logger(self, name, log_file, my_format, level=logging.INFO):
+    """
+    Parameters
+    ----------
+    name : str
+      name that indicates which logger is
+    log_file : str
+      path and name of the log file
+    my_format : str
+      format of the information put inside of the log file
+    level : INFO, optional
+      hierarchical level of information interest to catch (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+      (default is INFO)
+
+    Returns
+    ----------
+    LOGGER
+      a setted up logger 
+    """
     formatter = logging.Formatter(my_format)
     handler = logging.FileHandler(log_file)
     handler.setFormatter(formatter)
@@ -66,6 +113,18 @@ class SerialConnection():
     lo.addHandler(handler)
 
     return lo
+
+
+  def initiate_loggers(self):
+    time_now = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+    path = "./connection_esp32/LOGS/"
+
+    log_file_name_exc = path + f'exceptions/{time_now}.log'
+    self.logger_except = self.setup_logger('log_exception', log_file_name_exc, '%(lineno)d: %(asctime)s %(message)s', level=logging.ERROR)
+
+    log_file_name_info = path + f'info/{time_now}.log'
+    self.logger_info = self.setup_logger('log_info', log_file_name_info, '%(asctime)s %(message)s', level=logging.INFO)
+
 
   async def set_tasks(self, obj):
     reader = asyncio.create_task(self.read())
@@ -118,6 +177,19 @@ class SerialConnection():
     except serial.serialutil.SerialException:
       self.logger_except.exception('')
       self.is_connected = False
+
+
+  async def start_serial_connection(self, obj):
+    self.connect_serial()
+    while True:
+      if self.is_connected:
+        try:
+          await self.set_tasks(obj)
+        except Exception as e:
+          await self.handle_disconnection_exception()
+          await self.keep_trying_connection()
+      else:
+        await self.keep_trying_connection()
 
 
 async_serial = SerialConnection()
