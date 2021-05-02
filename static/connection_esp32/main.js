@@ -5,14 +5,20 @@ observableSocket.onmessage = function(e) {
   var djangoData = JSON.parse(e.data);
   console.log(djangoData);
 
-  id = djangoData['id']
-  type = djangoData['type']
-  count = djangoData['count']
-  lat = djangoData['lat']
-  lng = djangoData['lng']
-  high = djangoData['high']
+  if(djangoData['id'] == "3") {
+    document.querySelector('#json-received').innerText = "Conectando...";
+  }
+  else {
+    id = djangoData['id'];
+    type = djangoData['type'];
+    seq = djangoData['seq'];
+    payload = djangoData['payload']
+    lat = payload['lat'];
+    lng = payload['lng'];
+    high = payload['high'];
 
-  document.querySelector('#json-received').innerText = `{'id': '${id}', 'type': ${type}, 'count': ${count}, 'lat': ${lat}, 'lng': ${lng}, 'high': ${high}}`;
+    document.querySelector('#json-received').innerText = `{'id': '${id}', 'type': ${type}, 'seq': ${seq}, 'payload':{'lat': ${lat}, 'lng': ${lng}, 'high': ${high}}}`;
+  }
 }
 
 observableSocket.onclose = function(e) {
@@ -25,12 +31,12 @@ sendCommandSocket.onclose = function(e) {
 
 document.querySelector('#turn-on').onclick = function(e) {
   sendCommandSocket.send(JSON.stringify(
-    {'id': 1, 'type': 2, 'count': 3, 'lat': -9, 'lng': 10, 'high': 11}
+    {'id': 1, 'type': 2, 'seq': 3, 'payload':{'lat': -9, 'lng': 10, 'high': 11}}
   ));
 };
 
 document.querySelector('#turn-off').onclick = function(e) {
   sendCommandSocket.send(JSON.stringify(
-    {'id': 1, 'type': 1, 'count': 3, 'lat': -9, 'lng': 10, 'high': 11}
+    {'id': 1, 'type': 1, 'seq': 3, 'payload':{'lat': -9, 'lng': 10, 'high': 11}}
   ));
 };

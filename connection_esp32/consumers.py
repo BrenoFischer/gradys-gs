@@ -141,9 +141,11 @@ class SerialConnection():
         task.cancel()
 
 
-  async def keep_trying_connection(self):
+  async def keep_trying_connection(self, obj):
+    handshake_json = {"id": "3", "type": 300, "seq": 0, "payload": {}}
     while not self.is_connected:
         self.connect_serial()
+        await obj.send(json.dumps(handshake_json))
         await asyncio.sleep(3)
 
 
@@ -180,6 +182,8 @@ class SerialConnection():
 
 
   async def start_serial_connection(self, obj):
+    handshake_json = {"id": "3", "type": 300, "seq": 0, "payload": {}}
+    await obj.send(json.dumps(handshake_json))
     self.connect_serial()
     while True:
       if self.is_connected:
@@ -187,9 +191,9 @@ class SerialConnection():
           await self.set_tasks(obj)
         except Exception as e:
           await self.handle_disconnection_exception()
-          await self.keep_trying_connection()
+          await self.keep_trying_connection(obj)
       else:
-        await self.keep_trying_connection()
+        await self.keep_trying_connection(obj)
 
 
 async_serial = SerialConnection()
