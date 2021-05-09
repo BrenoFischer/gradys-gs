@@ -3,16 +3,38 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet"  href="{%  static  'connection_esp32/css/connection.css'  %}">
   <title>Real time counter</title>
 </head>
 
 <body>
-  <div id="json-received">
-    {{ text }}
-  </div>
-  <input id="turn-on" type="button" value="Liga">
-  <input id="turn-off" type="button" value="Desliga">
+  <div class="page-container">
 
-  <script src="{% static 'connection_esp32/main.js' %}"></script>
+    <div class="map-sidebar-container">
+      <div class="map">
+        Map
+      </div>
+      <div class="sidebar">
+        <div class="command-buttons">
+          <div class="buttons-set-container led-buttons">
+            <p>Botões LED</p>
+            <input class="button" id="turn-on" type="button" value="Liga">
+            <input class="button" id="turn-off" type="button" value="Desliga">
+          </div>
+          <div class="buttons-set-container forward-buttons">
+            <p>Botões Forward</p>
+            <input class="button" id="forward-1" type="button" value="Envia JSON 1">
+            <input class="button" id="forward-2" type="button" value="Envia JSON 2">
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="logs-container">
+      <div id="json-received">Logs</div>
+    </div>
+  </div>
+  <script src="{% static 'connection_esp32/js/main.js' %}"></script>
 </body>
 </html>

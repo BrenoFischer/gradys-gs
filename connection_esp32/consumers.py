@@ -83,6 +83,7 @@ class SerialConnection():
     self.queue = None
     self.logger_info = None
     self.logger_except = None
+    self.handshake_json =  {"id": "3", "type": 0, "seq": 0, "ACK": 0, "SDATA": 0, "lat": -9, "lng": 10, "high": 11}
 
 
   def setup_logger(self, name, log_file, my_format, level=logging.INFO):
@@ -142,10 +143,9 @@ class SerialConnection():
 
 
   async def keep_trying_connection(self, obj):
-    handshake_json = {"id": "3", "type": 300, "seq": 0, "payload": {}}
     while not self.is_connected:
         self.connect_serial()
-        await obj.send(json.dumps(handshake_json))
+        await obj.send(json.dumps(self.handshake_json))
         await asyncio.sleep(3)
 
 
@@ -182,8 +182,7 @@ class SerialConnection():
 
 
   async def start_serial_connection(self, obj):
-    handshake_json = {"id": "3", "type": 300, "seq": 0, "payload": {}}
-    await obj.send(json.dumps(handshake_json))
+    await obj.send(json.dumps(self.handshake_json))
     self.connect_serial()
     while True:
       if self.is_connected:

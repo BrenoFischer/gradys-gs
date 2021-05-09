@@ -5,4 +5,4 @@ def index(request):
   return render(request, 'index.html', context={})
 
 def connection(request):
-  return render(request, 'connection.html', context={'text': "Hello World"})
+  return render(request, 'connection.html', context={})

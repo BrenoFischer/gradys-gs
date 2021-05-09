@@ -2,3 +2,4 @@
 venv/
 dump.rdb
 .env
+connection_esp32/LOGS
