@@ -15,7 +15,7 @@ html, body {
 }
 
 .map-sidebar-container {
-  height: 70%;
+  height: 75%;
   display: flex;
   justify-content: center;
 }
@@ -43,25 +43,32 @@ html, body {
   margin-top: 10px;
   background: #0f1923;
   color: #ece8e1;
-  width: 12vw;
+  width: 16vw;
   height: 40px;
   padding: 8px;
   border: 2px solid #ece8e1;
   box-shadow: inset 0 0 0 0 #ff4655;
-  transition: ease-out 0.3s;
+  transition: 100ms linear;
 }
 
 .button:hover {
-  box-shadow: inset 12vw 0 0 0 #ff4655;
+  box-shadow: inset 16vw 0 0 0 #ff4655;
   cursor: pointer;
 }
 
 .button:active {
-  box-shadow: inset 12vw 0 0 0 #fc616e;
+  box-shadow: inset 16vw 0 0 0 #0f1923;
 }
 
 .logs-container {
-  height: 30%;
+  height: 25%;
   width: 100%;
   border: 2px solid #424242;
+  padding: 20px;
+  font-size: 20px;
+}
+
+#actions-logs {
+  color: #ff4655;
+  margin-top: 10px;
 }

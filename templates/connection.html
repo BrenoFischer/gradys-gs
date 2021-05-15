@@ -12,9 +12,7 @@
   <div class="page-container">
 
     <div class="map-sidebar-container">
-      <div class="map">
-        Map
-      </div>
+      <div class="map"></div>
       <div class="sidebar">
         <div class="command-buttons">
           <div class="buttons-set-container led-buttons">
@@ -27,12 +25,18 @@
             <input class="button" id="forward-1" type="button" value="Envia JSON 1">
             <input class="button" id="forward-2" type="button" value="Envia JSON 2">
           </div>
+          <div class="buttons-set-container flight-buttons">
+            <p>Botões de Voo</p>
+            <input class="button" id="initiate-flight" type="button" value="Iniciar voo">
+            <input class="button" id="interrupt-flight" type="button" value="Interromper voo">
+          </div>
         </div>
       </div>
     </div>
     
     <div class="logs-container">
-      <div id="json-received">Logs</div>
+      <div id="connection-status"></div>
+      <div id="actions-logs"></div>
     </div>
   </div>
   <script src="{% static 'connection_esp32/js/main.js' %}"></script>

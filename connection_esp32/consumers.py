@@ -12,7 +12,8 @@ class ReceiveCommandConsumer(AsyncWebsocketConsumer):
     await self.accept()
 
   async def receive(self, text_data):
-    await async_serial.aio_instance.write_async(text_data.encode())
+    if async_serial.is_connected:
+      await async_serial.aio_instance.write_async(text_data.encode())
 
   async def disconnect(self, close_code):
     print(f'Receive command websocket disconnected {close_code}')
@@ -83,8 +84,8 @@ class SerialConnection():
     self.queue = None
     self.logger_info = None
     self.logger_except = None
-    self.handshake_json =  {"id": "3", "type": 0, "seq": 0, "ACK": 0, "SDATA": 0, "lat": -9, "lng": 10, "high": 11}
-
+    self.handshake_json =  {"id": "3", "type": 13, "seq": 0, "ACK": 0, "SDATA": 0, "lat": -9, "lng": 10, "high": 11}
+    self.connected_json = {"id": "3", "type": 14, "seq": 0, "ACK": 0, "SDATA": 0, "lat": -9, "lng": 10, "high": 11}
 
   def setup_logger(self, name, log_file, my_format, level=logging.INFO):
     """
@@ -144,8 +145,7 @@ class SerialConnection():
 
   async def keep_trying_connection(self, obj):
     while not self.is_connected:
-        self.connect_serial()
-        await obj.send(json.dumps(self.handshake_json))
+        await self.connect_serial(obj)
         await asyncio.sleep(3)
 
 
@@ -169,27 +169,31 @@ class SerialConnection():
       await obj.send(json.dumps(json_consumed))
 
 
-  def connect_serial(self):
+  async def connect_serial(self, obj):
     print("Tentando conexão com a serial...")
     try:
       self.aio_instance = aioserial.AioSerial(port='COM4', baudrate=115200)
       self.aio_instance.flush()
       print("Conexão estabelecida")
       self.is_connected = True
+      await obj.send(json.dumps(self.connected_json))
     except serial.serialutil.SerialException:
       self.logger_except.exception('')
       self.is_connected = False
+      await obj.send(json.dumps(self.handshake_json))
 
 
   async def start_serial_connection(self, obj):
     await obj.send(json.dumps(self.handshake_json))
-    self.connect_serial()
+    await self.connect_serial(obj)
     while True:
       if self.is_connected:
+        await obj.send(json.dumps(self.connected_json))
         try:
           await self.set_tasks(obj)
-        except Exception as e:
+        except Exception:
           await self.handle_disconnection_exception()
+          await obj.send(json.dumps(self.handshake_json))
           await self.keep_trying_connection(obj)
       else:
         await self.keep_trying_connection(obj)
