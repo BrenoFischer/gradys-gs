@@ -10,9 +10,14 @@
 
 <body>
   <div class="page-container">
-
-    <div class="map-sidebar-container">
-      <div class="map"></div>
+    <div class="wrapper">
+      <div class="map-logs-container">
+        <div class="map"></div>
+        <div class="logs-container">
+          <div id="connection-status"></div>
+          <div id="actions-logs"></div>
+        </div>
+      </div>
       <div class="sidebar">
         <div class="command-buttons">
           <div class="buttons-set-container led-buttons">
@@ -33,12 +38,8 @@
         </div>
       </div>
     </div>
-    
-    <div class="logs-container">
-      <div id="connection-status"></div>
-      <div id="actions-logs"></div>
-    </div>
   </div>
+
   <script src="{% static 'connection_esp32/js/main.js' %}"></script>
 </body>
 </html>

@@ -14,21 +14,44 @@ html, body {
   height: 100%;
 }
 
-.map-sidebar-container {
-  height: 75%;
+.wrapper {
+  height: 100%;
   display: flex;
   justify-content: center;
 }
 
-.map {
+.map-logs-container {
+  height: 100%;
   width: 80%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.map {
+  height: 80%;
   border: 2px solid #424242;
+}
+
+.logs-container {
+  height: 20%;
+  border: 2px solid #424242;
+  padding: 20px;
+  font-size: 20px;
+  overflow-y: auto;
+}
+
+#actions-logs {
+  color: #ff4655;
+  margin-top: 10px;
 }
 
 .sidebar {
   width: 20%;
+  height: 100%;
   text-align: center;
   border: 2px solid #424242;
+  overflow-y: auto;
 }
 
 .buttons-set-container {
@@ -58,17 +81,4 @@ html, body {
 
 .button:active {
   box-shadow: inset 16vw 0 0 0 #0f1923;
-}
-
-.logs-container {
-  height: 25%;
-  width: 100%;
-  border: 2px solid #424242;
-  padding: 20px;
-  font-size: 20px;
-}
-
-#actions-logs {
-  color: #ff4655;
-  margin-top: 10px;
 }
