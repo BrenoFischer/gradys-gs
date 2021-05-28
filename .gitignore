@@ -2,4 +2,7 @@
 venv/
 dump.rdb
 .env
-connection_esp32/LOGS
+connection_esp32/LOGS/exceptions/*
+connection_esp32/LOGS/info/*
+!connection_esp32/LOGS/exceptions/.gitkeep
+!connection_esp32/LOGS/info/.gitkeep
