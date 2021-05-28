@@ -8,10 +8,12 @@ observableSocket.onmessage = function(msg) {
     json_type = djangoData['type'];
     switch(json_type) {
       case 13:  //Esperando conexão
-        document.querySelector('#connection-status').innerText = "Esperando conexão serial...";
+        document.querySelector('#disconnected').innerText = "Esperando conexão serial...";
+        document.querySelector('#connected').innerText = "";
         break;
       case 14:  //Conectado
-        document.querySelector('#connection-status').innerText = "Conectado";
+        document.querySelector('#disconnected').innerText = "";
+        document.querySelector('#connected').innerText = "Conectado";
         break;
       case 21:  //cmd-led-on-ACK
         document.querySelector('#actions-logs').innerText = "Acendeu LED";

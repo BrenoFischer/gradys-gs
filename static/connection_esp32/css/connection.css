@@ -36,7 +36,6 @@ html, body {
 .logs-container {
   height: 20%;
   border: 2px solid #424242;
-  padding: 20px;
   font-size: 20px;
   overflow-y: auto;
 }
@@ -51,7 +50,12 @@ html, body {
   height: 100%;
   text-align: center;
   border: 2px solid #424242;
+}
+
+.command-buttons {
+  height: 80%;
   overflow-y: auto;
+  border: 2px solid #424242;
 }
 
 .buttons-set-container {
@@ -81,4 +85,20 @@ html, body {
 
 .button:active {
   box-shadow: inset 16vw 0 0 0 #0f1923;
+}
+
+.connection-status-container {
+  height: 20%;
+  border: 2px solid #424242;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#connected {
+  color: #46ff7e;
+}
+
+#disconnected {
+  color: #ff4655;
 }
