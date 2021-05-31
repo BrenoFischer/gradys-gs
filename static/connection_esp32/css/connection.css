@@ -1,3 +1,4 @@
+/*
 html, body {
   height: 100%;
   background-color: #0f1923;
@@ -89,6 +90,99 @@ html, body {
 
 .connection-status-container {
   height: 20%;
+  border: 2px solid #424242;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#connected {
+  color: #46ff7e;
+}
+
+#disconnected {
+  color: #ff4655;
+}
+*/
+
+html, body {
+  height: 100%;
+  background-color: #0f1923;
+  color: white;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.page-container{
+  display: grid;
+  height: 100vh;
+  grid-template-columns: 1.6fr 0.4fr;
+  grid-template-rows: 1.5fr 0.5fr;
+}
+
+.map {
+  border: 2px solid #424242;
+}
+
+.command-buttons {
+  border: 2px solid #424242;
+  overflow-y: auto;
+}
+
+.buttons-set-container {
+  padding: 20px 0 20px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.button {
+  margin-top: 10px;
+  background: #0f1923;
+  color: #ece8e1;
+  width: 16vw;
+  height: 40px;
+  padding: 8px;
+  border: 2px solid #ece8e1;
+  box-shadow: inset 0 0 0 0 #ff4655;
+  transition: 100ms linear;
+}
+
+.button:hover {
+  box-shadow: inset 16vw 0 0 0 #ff4655;
+  cursor: pointer;
+}
+
+.button:active {
+  box-shadow: inset 16vw 0 0 0 #0f1923;
+}
+
+.log {
+  border: 2px solid #424242;
+  font-size: 20px;
+  overflow-y: auto;
+}
+
+#actions-logs {
+  color: #ff4655;
+  margin-top: 10px;
+}
+
+.json-sent {
+  padding: 10px;
+}
+
+.json-received {
+  padding: 10px;
+  color: #fff;
+}
+
+.connection-status {
   border: 2px solid #424242;
   display: flex;
   align-items: center;

@@ -8,6 +8,7 @@
   <title>Real time counter</title>
 </head>
 
+<!--
 <body>
   <div class="page-container">
     <div class="wrapper">
@@ -42,6 +43,37 @@
       </div>
     </div>
   </div>
+-->
+
+  <body>
+    <div class="page-container">
+      <div class="map"></div>
+      <div class="command-buttons">
+        <div class="buttons-set-container led-buttons">
+          <p>Botões LED</p>
+          <input class="button" id="turn-on" type="button" value="Liga">
+          <input class="button" id="turn-off" type="button" value="Desliga">
+        </div>
+        <div class="buttons-set-container forward-buttons">
+          <p>Botões Forward</p>
+          <input class="button" id="forward-1" type="button" value="Envia JSON 1">
+          <input class="button" id="forward-2" type="button" value="Envia JSON 2">
+        </div>
+        <div class="buttons-set-container flight-buttons">
+          <p>Botões de Voo</p>
+          <input class="button" id="initiate-flight" type="button" value="Iniciar voo">
+          <input class="button" id="interrupt-flight" type="button" value="Interromper voo">
+        </div>
+      </div>
+      <div class="log">
+        <div id="actions-logs"></div>
+      </div>
+      <div class="connection-status">
+        <div id="connected"></div>
+        <div id="disconnected"></div>
+      </div>
+    </div>
+  </body>
 
   <script src="{% static 'connection_esp32/js/main.js' %}"></script>
 </body>

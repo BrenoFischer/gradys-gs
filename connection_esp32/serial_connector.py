@@ -34,7 +34,7 @@ class SerialConnection():
   setup_logger(name, log_file, my_format, level=logging.INFO)
     Return the logger, according to it's logging purpose.
 
-  set_tasks(obj)
+  set_tasks(websocket)
     Create the reader, consumer tasks, the queue and keep waiting them to finish
 
   handle_disconnection_exception()
@@ -46,7 +46,7 @@ class SerialConnection():
   read()
     Keep waiting for messages from the serial and put it in the queue
 
-  consume(obj)
+  consume(websocket)
     Keep waiting for a message in the queue, put the info in the log file and send it to the client,
     through websocket
 
@@ -110,9 +110,9 @@ class SerialConnection():
     self.logger_info = self.setup_logger('log_info', log_file_name_info, '%(asctime)s %(message)s', level=logging.INFO)
 
 
-  async def set_tasks(self, obj):
+  async def set_tasks(self, websocket):
     reader = asyncio.create_task(self.read())
-    consumer = asyncio.create_task(self.consume(obj))
+    consumer = asyncio.create_task(self.consume(websocket))
     self.queue = asyncio.Queue()
     self.tasks.extend([reader, consumer])
     await asyncio.gather(reader)
@@ -125,9 +125,9 @@ class SerialConnection():
         task.cancel()
 
 
-  async def keep_trying_connection(self, obj):
+  async def keep_trying_connection(self, websocket):
     while not self.is_connected:
-        await self.connect_serial(obj)
+        await self.connect_serial(websocket)
         await asyncio.sleep(3)
 
 
@@ -142,40 +142,40 @@ class SerialConnection():
         self.logger_except.exception('')
 
 
-  async def consume(self, obj):
+  async def consume(self, websocket):
     while True:
       json_consumed = await self.queue.get()
       self.queue.task_done()
       print(f'consumed {json_consumed}')
       self.logger_info.info(json_consumed)
-      await obj.send(json.dumps(json_consumed))
+      await websocket.send(json.dumps(json_consumed))
 
 
-  async def connect_serial(self, obj):
+  async def connect_serial(self, websocket):
     print("Tentando conexão com a serial...")
     try:
       self.aio_instance = aioserial.AioSerial(port=self.port, baudrate=self.baudrate)
       self.aio_instance.flush()
       print("Conexão estabelecida")
       self.is_connected = True
-      await obj.send(json.dumps(self.connected_json))
+      await websocket.send(json.dumps(self.connected_json))
     except serial.serialutil.SerialException:
       self.logger_except.exception('')
       self.is_connected = False
-      await obj.send(json.dumps(self.handshake_json))
+      await websocket.send(json.dumps(self.handshake_json))
 
 
-  async def start_serial_connection(self, obj):
-    await obj.send(json.dumps(self.handshake_json))
-    await self.connect_serial(obj)
+  async def start_serial_connection(self, websocket):
+    await websocket.send(json.dumps(self.handshake_json))
+    await self.connect_serial(websocket)
     while True:
       if self.is_connected:
-        await obj.send(json.dumps(self.connected_json))
+        await websocket.send(json.dumps(self.connected_json))
         try:
-          await self.set_tasks(obj)
+          await self.set_tasks(websocket)
         except Exception:
           await self.handle_disconnection_exception()
-          await obj.send(json.dumps(self.handshake_json))
-          await self.keep_trying_connection(obj)
+          await websocket.send(json.dumps(self.handshake_json))
+          await self.keep_trying_connection(websocket)
       else:
-        await self.keep_trying_connection(obj)
+        await self.keep_trying_connection(websocket)
