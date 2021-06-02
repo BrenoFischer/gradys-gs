@@ -1,114 +1,16 @@
-/*
-html, body {
-  height: 100%;
-  background-color: #0f1923;
-  color: white;
+:root {
+  --primary-color: #ff4655;
+  --white-color: #ece8e1;
+  --green-color: #46ff7e;
+  --background-color: #0f1923;
+  --border-color: #424242;
+  --border-width: 2px;
 }
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-.page-container {
-  height: 100%;
-}
-
-.wrapper {
-  height: 100%;
-  display: flex;
-  justify-content: center;
-}
-
-.map-logs-container {
-  height: 100%;
-  width: 80%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.map {
-  height: 80%;
-  border: 2px solid #424242;
-}
-
-.logs-container {
-  height: 20%;
-  border: 2px solid #424242;
-  font-size: 20px;
-  overflow-y: auto;
-}
-
-#actions-logs {
-  color: #ff4655;
-  margin-top: 10px;
-}
-
-.sidebar {
-  width: 20%;
-  height: 100%;
-  text-align: center;
-  border: 2px solid #424242;
-}
-
-.command-buttons {
-  height: 80%;
-  overflow-y: auto;
-  border: 2px solid #424242;
-}
-
-.buttons-set-container {
-  padding: 20px 0 20px 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-}
-
-.button {
-  margin-top: 10px;
-  background: #0f1923;
-  color: #ece8e1;
-  width: 16vw;
-  height: 40px;
-  padding: 8px;
-  border: 2px solid #ece8e1;
-  box-shadow: inset 0 0 0 0 #ff4655;
-  transition: 100ms linear;
-}
-
-.button:hover {
-  box-shadow: inset 16vw 0 0 0 #ff4655;
-  cursor: pointer;
-}
-
-.button:active {
-  box-shadow: inset 16vw 0 0 0 #0f1923;
-}
-
-.connection-status-container {
-  height: 20%;
-  border: 2px solid #424242;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-#connected {
-  color: #46ff7e;
-}
-
-#disconnected {
-  color: #ff4655;
-}
-*/
 
 html, body {
   height: 100%;
-  background-color: #0f1923;
-  color: white;
+  background-color: var(--background-color);
+  color: var(--white-color);
 }
 
 * {
@@ -124,12 +26,15 @@ html, body {
   grid-template-rows: 1.5fr 0.5fr;
 }
 
-.map {
-  border: 2px solid #424242;
+#map {
+  height: 100%;
+}
+
+.section-container {
+  border: var(--border-width) solid var(--border-color);
 }
 
 .command-buttons {
-  border: 2px solid #424242;
   overflow-y: auto;
 }
 
@@ -143,33 +48,32 @@ html, body {
 
 .button {
   margin-top: 10px;
-  background: #0f1923;
-  color: #ece8e1;
+  background: var(--background-color);
+  color: var(--white-color);
   width: 16vw;
   height: 40px;
   padding: 8px;
-  border: 2px solid #ece8e1;
-  box-shadow: inset 0 0 0 0 #ff4655;
+  border: 2px solid var(--white-color);
+  box-shadow: inset 0 0 0 0 var(--primary-color);
   transition: 100ms linear;
 }
 
 .button:hover {
-  box-shadow: inset 16vw 0 0 0 #ff4655;
+  box-shadow: inset 16vw 0 0 0 var(--primary-color);
   cursor: pointer;
 }
 
 .button:active {
-  box-shadow: inset 16vw 0 0 0 #0f1923;
+  box-shadow: inset 16vw 0 0 0 var(--background-color);
 }
 
 .log {
-  border: 2px solid #424242;
   font-size: 20px;
   overflow-y: auto;
 }
 
 #actions-logs {
-  color: #ff4655;
+  color: var(--primary-color);
   margin-top: 10px;
 }
 
@@ -179,20 +83,19 @@ html, body {
 
 .json-received {
   padding: 10px;
-  color: #fff;
+  color: var(--white-color);
 }
 
 .connection-status {
-  border: 2px solid #424242;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 #connected {
-  color: #46ff7e;
+  color: var(--green-color);
 }
 
 #disconnected {
-  color: #ff4655;
+  color: var(--primary-color);
 }

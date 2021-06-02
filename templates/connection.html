@@ -6,49 +6,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet"  href="{%  static  'connection_esp32/css/connection.css'  %}">
   <title>Real time counter</title>
+  <script src="{% static 'connection_esp32/js/gmap.js' %}"></script>
 </head>
-
-<!--
-<body>
-  <div class="page-container">
-    <div class="wrapper">
-      <div class="map-logs-container">
-        <div class="map"></div>
-        <div class="logs-container">
-          <div id="actions-logs"></div>
-        </div>
-      </div>
-      <div class="sidebar">
-        <div class="command-buttons">
-          <div class="buttons-set-container led-buttons">
-            <p>Botões LED</p>
-            <input class="button" id="turn-on" type="button" value="Liga">
-            <input class="button" id="turn-off" type="button" value="Desliga">
-          </div>
-          <div class="buttons-set-container forward-buttons">
-            <p>Botões Forward</p>
-            <input class="button" id="forward-1" type="button" value="Envia JSON 1">
-            <input class="button" id="forward-2" type="button" value="Envia JSON 2">
-          </div>
-          <div class="buttons-set-container flight-buttons">
-            <p>Botões de Voo</p>
-            <input class="button" id="initiate-flight" type="button" value="Iniciar voo">
-            <input class="button" id="interrupt-flight" type="button" value="Interromper voo">
-          </div>
-        </div>
-        <div class="connection-status-container">
-          <div id="connected"></div>
-          <div id="disconnected"></div>
-        </div>
-      </div>
-    </div>
-  </div>
--->
-
   <body>
     <div class="page-container">
-      <div class="map"></div>
-      <div class="command-buttons">
+      <div class="section-container map-container">
+        <div id="map"></div>
+      </div>
+      <div class="section-container command-buttons">
         <div class="buttons-set-container led-buttons">
           <p>Botões LED</p>
           <input class="button" id="turn-on" type="button" value="Liga">
@@ -65,14 +30,19 @@
           <input class="button" id="interrupt-flight" type="button" value="Interromper voo">
         </div>
       </div>
-      <div class="log">
+      <div class="section-container log">
         <div id="actions-logs"></div>
       </div>
-      <div class="connection-status">
+      <div class="section-container connection-status">
         <div id="connected"></div>
         <div id="disconnected"></div>
       </div>
     </div>
+
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key={{google_maps_key}}&callback=initMap&libraries=&v=weekly"
+      async
+    ></script>
   </body>
 
   <script src="{% static 'connection_esp32/js/main.js' %}"></script>
