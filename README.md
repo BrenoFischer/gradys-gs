@@ -20,7 +20,9 @@
 ### Acessando variaveis secretas:
 <!--ts-->
   * Criar file com nome .env na pasta "config" em root/config
-  * Colocar a variável secreta dentro do arquivo .env
+  * Colocar as variáveis secretas dentro do arquivo .env:
+    * Digitar a chave: SECRET_KEY='xxxx'
+    * Digitar a chave: GOOGLE_MAPS_API_KEY='xxxx'
 <!--te-->
 
 ### Rodando servidor conexão arduino:
