@@ -68,6 +68,10 @@ observableSocket.onmessage = function(msg) {
         break;
       case 35: //Informação drone recebido
         notifyUiWhenJsonReceived(msg.data, msgDrone);
+        let id = djangoData['id'];
+        let lat = parseFloat(djangoData['lat']);
+        let log = parseFloat(djangoData['log']);
+        gmap.newMarker(id, lat, log);
         break;
       default:
         //document.querySelector('#actions-logs').innerText = "JSON unknown: " + msg.data;
