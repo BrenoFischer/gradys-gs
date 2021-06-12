@@ -25,6 +25,13 @@
     * Digitar a chave: GOOGLE_MAPS_API_KEY='xxxx'
 <!--te-->
 
+### Modificar informações conexão serial
+<!--ts-->
+  * Modificar os campos no arquivo serial_config.ini
+    * port -> porta que o esp está conectado
+    * baudrate -> bit rate da conexão serial
+<!--te-->
+
 ### Rodando servidor conexão arduino:
 <!--ts-->
   * Rodar python manage.py runserver

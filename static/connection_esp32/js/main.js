@@ -10,10 +10,10 @@ function notifyUiWhenJsonSent(json_sent) {
   element.appendChild(p);
 }
 
-function notifyUiWhenJsonReceived(json_received) {
+function notifyUiWhenJsonReceived(json_received, msg) {
   var element = document.getElementById('actions-logs');
   var p = document.createElement("p");
-  p.appendChild(document.createTextNode("JSON recebido: " + json_received));
+  p.appendChild(document.createTextNode(msg + json_received));
   p.className += "json-received";
 
   element.appendChild(p);
@@ -24,6 +24,9 @@ observableSocket.onmessage = function(msg) {
     var djangoData = JSON.parse(msg.data);
     console.log(djangoData);
     json_type = djangoData['type'];
+    msgUi = "JSON recebido: ";
+    msgDefault = "JSON unknown: ";
+    msgDrone = "Drone info JSON: ";
     switch(json_type) {
       case 13:  //Esperando conexão
         document.querySelector('#disconnected').innerText = "Esperando conexão serial...";
@@ -36,36 +39,39 @@ observableSocket.onmessage = function(msg) {
       case 21:  //cmd-led-on-ACK
         //document.querySelector('#actions-logs').innerText = "Acendeu LED";
         //notifyUiWhenJsonReceived("Acendeu LED");
-        notifyUiWhenJsonReceived(msg.data);
+        notifyUiWhenJsonReceived(msg.data, msgUi);
         break;
       case 23:  //cmd-led-off-ACK
         //document.querySelector('#actions-logs').innerText = "Apagou LED";
         //notifyUiWhenJsonReceived("Apagou LED");
-        notifyUiWhenJsonReceived(msg.data);
+        notifyUiWhenJsonReceived(msg.data, msgUi);
         break;
       case 25: //forward 1 ACK
         //document.querySelector('#actions-logs').innerText = "Forward 1 recebido";
         //notifyUiWhenJsonReceived("Forward 1 recebido");
-        notifyUiWhenJsonReceived(msg.data);
+        notifyUiWhenJsonReceived(msg.data, msgUi);
         break;
       case 27: //forward 2 ACK
         //document.querySelector('#actions-logs').innerText = "Forward 2 recebido";
         //notifyUiWhenJsonReceived("Forward 2 recebido");
-        notifyUiWhenJsonReceived(msg.data);
+        notifyUiWhenJsonReceived(msg.data, msgUi);
         break;
       case 29: //Voo iniciado ACK
         //document.querySelector('#actions-logs').innerText = "Voo iniciado";
         //notifyUiWhenJsonReceived("Voo iniciado");
-        notifyUiWhenJsonReceived(msg.data);
+        notifyUiWhenJsonReceived(msg.data, msgUi);
         break;
       case 31: //Voo abortado ACK
         //document.querySelector('#actions-logs').innerText = "Voo abortado";
         //notifyUiWhenJsonReceived("Voo abortado");
-        notifyUiWhenJsonReceived(msg.data);
+        notifyUiWhenJsonReceived(msg.data, msgUi);
+        break;
+      case 35: //Informação drone recebido
+        notifyUiWhenJsonReceived(msg.data, msgDrone);
         break;
       default:
         //document.querySelector('#actions-logs').innerText = "JSON unknown: " + msg.data;
-        notifyUiWhenJsonReceived("JSON unknown: " + msg.data);
+        notifyUiWhenJsonReceived(msg.data, msgDefault);
         break;
     }
   } catch(e) {
