@@ -1,32 +1,36 @@
 var observableSocket = new WebSocket('ws://localhost:8000/ws/connection/');
 var sendCommandSocket = new WebSocket('ws://localhost:8000/ws/receive/');
+var receivePostSocket = new WebSocket('ws://localhost:8000/ws/post/');
 
-function notifyUiWhenJsonSent(json_sent) {
+
+function notifyUiWhenJsonSent(jsonSent) {
   var element = document.getElementById('actions-logs');
   var p = document.createElement("p");
-  p.appendChild(document.createTextNode("JSON enviado: " + json_sent));
+  p.appendChild(document.createTextNode("JSON enviado: " + jsonSent));
   p.className += "json-sent";
 
   element.appendChild(p);
 }
 
-function notifyUiWhenJsonReceived(json_received, msg) {
+function notifyUiWhenJsonReceived(jsonReceived, msg) {
   var element = document.getElementById('actions-logs');
   var p = document.createElement("p");
-  p.appendChild(document.createTextNode(msg + json_received));
+  p.appendChild(document.createTextNode(msg + jsonReceived));
   p.className += "json-received";
 
   element.appendChild(p);
 }
 
-observableSocket.onmessage = function(msg) {
+function checkJsonType(msg) {
   try {
     var djangoData = JSON.parse(msg.data);
     console.log(djangoData);
     json_type = djangoData['type'];
+
     msgUi = "JSON recebido: ";
     msgDefault = "JSON unknown: ";
     msgDrone = "Drone info JSON: ";
+
     switch(json_type) {
       case 13:  //Esperando conexão
         document.querySelector('#disconnected').innerText = "Esperando conexão serial...";
@@ -37,33 +41,21 @@ observableSocket.onmessage = function(msg) {
         document.querySelector('#connected').innerText = "Conectado";
         break;
       case 21:  //cmd-led-on-ACK
-        //document.querySelector('#actions-logs').innerText = "Acendeu LED";
-        //notifyUiWhenJsonReceived("Acendeu LED");
         notifyUiWhenJsonReceived(msg.data, msgUi);
         break;
       case 23:  //cmd-led-off-ACK
-        //document.querySelector('#actions-logs').innerText = "Apagou LED";
-        //notifyUiWhenJsonReceived("Apagou LED");
         notifyUiWhenJsonReceived(msg.data, msgUi);
         break;
       case 25: //forward 1 ACK
-        //document.querySelector('#actions-logs').innerText = "Forward 1 recebido";
-        //notifyUiWhenJsonReceived("Forward 1 recebido");
         notifyUiWhenJsonReceived(msg.data, msgUi);
         break;
       case 27: //forward 2 ACK
-        //document.querySelector('#actions-logs').innerText = "Forward 2 recebido";
-        //notifyUiWhenJsonReceived("Forward 2 recebido");
         notifyUiWhenJsonReceived(msg.data, msgUi);
         break;
       case 29: //Voo iniciado ACK
-        //document.querySelector('#actions-logs').innerText = "Voo iniciado";
-        //notifyUiWhenJsonReceived("Voo iniciado");
         notifyUiWhenJsonReceived(msg.data, msgUi);
         break;
       case 31: //Voo abortado ACK
-        //document.querySelector('#actions-logs').innerText = "Voo abortado";
-        //notifyUiWhenJsonReceived("Voo abortado");
         notifyUiWhenJsonReceived(msg.data, msgUi);
         break;
       case 35: //Informação drone recebido
@@ -74,25 +66,40 @@ observableSocket.onmessage = function(msg) {
         gmap.newMarker(id, lat, log);
         break;
       default:
-        //document.querySelector('#actions-logs').innerText = "JSON unknown: " + msg.data;
         notifyUiWhenJsonReceived(msg.data, msgDefault);
         break;
     }
   } catch(e) {
-    //document.querySelector('#actions-logs').innerText = msg.data;
     notifyUiWhenJsonReceived(msg.data);
   }
 }
 
+receivePostSocket.onmessage = function(msg) {
+  checkJsonType(msg);
+}
+
+observableSocket.onmessage = function(msg) {
+  checkJsonType(msg);
+}
+
+
+//On close functions
+//-------------------
 observableSocket.onclose = function(e) {
   console.error('Connection socket closed unexpectedly');
 };
 
 sendCommandSocket.onclose = function(e) {
-  console.error('Receive socket closed unexpectedly');
+  console.error('Send command socket closed unexpectedly');
 };
 
+receivePostSocket.onclose = function(e) {
+  console.error('Receive POST socket closed unexpectedly');
+}
+
+
 // Onclick functions
+//-------------------
 document.querySelector('#turn-on').onclick = function(e) {
   if (sendCommandSocket.readyState == WebSocket.OPEN) {
     json_to_send = JSON.stringify(

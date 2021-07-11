@@ -127,8 +127,8 @@ class SerialConnection():
 
   async def keep_trying_connection(self, websocket):
     while not self.is_connected:
-        await self.connect_serial(websocket)
-        await asyncio.sleep(3)
+      await self.connect_serial(websocket)
+      await asyncio.sleep(3)
 
 
   async def read(self):
@@ -139,7 +139,8 @@ class SerialConnection():
         json_line = json.loads(decoded_line)
         await self.queue.put(json_line)
       except ValueError:
-        self.logger_except.exception('')
+        if self.logger_except != None:
+          self.logger_except.exception('')
 
 
   async def consume(self, websocket):
@@ -147,8 +148,9 @@ class SerialConnection():
       json_consumed = await self.queue.get()
       self.queue.task_done()
       print(f'consumed {json_consumed}')
-      self.logger_info.info(json_consumed)
       await websocket.send(json.dumps(json_consumed))
+      if self.logger_info != None:
+        self.logger_info.info(json_consumed)
 
 
   async def connect_serial(self, websocket):
@@ -160,9 +162,10 @@ class SerialConnection():
       self.is_connected = True
       await websocket.send(json.dumps(self.connected_json))
     except serial.serialutil.SerialException:
-      self.logger_except.exception('')
       self.is_connected = False
       await websocket.send(json.dumps(self.handshake_json))
+      if self.logger_except != None:
+        self.logger_except.exception('')
 
 
   async def start_serial_connection(self, websocket):
