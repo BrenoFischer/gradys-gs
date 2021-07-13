@@ -27,10 +27,16 @@ def create_new_dict(request_received):
 
 @csrf_exempt 
 def post_to_socket(request):
+  # Start ACK with an error code on type (101?).
+  # If the post is sent to the consumer, the type is 103.
+  ack = {"id": 1, "type": 101, "seq": 0, "lat": 0, "log": 0, "high": 0, "DATA": "0"}
+
   if request.method == 'POST':
     new_dict = create_new_dict(request)
 
     post_consumer_instance = get_post_consumer_instance()
     post_consumer_instance.receive_post(new_dict)
 
-  return JsonResponse({'status_code':'ok'})
+    ack['type'] = 103
+
+  return JsonResponse(ack)
