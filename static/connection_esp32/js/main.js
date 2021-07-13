@@ -58,7 +58,7 @@ function checkJsonType(msg) {
       case 31: //Voo abortado ACK
         notifyUiWhenJsonReceived(msg.data, msgUi);
         break;
-      case 35: //Informação drone recebido
+      case 102: //Informação drone recebido
         notifyUiWhenJsonReceived(msg.data, msgDrone);
         let id = djangoData['id'];
         let lat = parseFloat(djangoData['lat']);
