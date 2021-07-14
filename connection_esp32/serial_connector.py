@@ -144,10 +144,18 @@ class SerialConnection():
 
 
   async def consume(self, websocket):
+    from .consumers import get_json_list_persistent, append_json_to_list, get_time
+
     while True:
       json_consumed = await self.queue.get()
       self.queue.task_done()
-      print(f'consumed {json_consumed}')
+      json_consumed['method'] = 'serial'
+      json_consumed['time'] = get_time()
+
+      json_list_persistent = get_json_list_persistent()
+      append_json_to_list(json_consumed, json_list_persistent)
+
+      #print(f'consumed {json_consumed}')
       await websocket.send(json.dumps(json_consumed))
       if self.logger_info != None:
         self.logger_info.info(json_consumed)
