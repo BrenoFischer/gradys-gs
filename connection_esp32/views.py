@@ -35,8 +35,8 @@ def post_to_socket(request):
     new_dict = create_new_dict(request)
 
     post_consumer_instance = get_post_consumer_instance()
-    post_consumer_instance.receive_post(new_dict)
-
-    ack['type'] = 103
+    if post_consumer_instance is not None:
+      post_consumer_instance.receive_post(new_dict)
+      ack['type'] = 103
 
   return JsonResponse(ack)

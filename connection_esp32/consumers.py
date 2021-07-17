@@ -1,4 +1,5 @@
 import json
+import asyncio
 from datetime import date, datetime
 from .serial_connector import SerialConnection
 
@@ -44,6 +45,34 @@ class PostConsumer(WebsocketConsumer):
     print(f'Post websocket disconnected {close_code}')
 
 
+class UpdatePeriodcallyConsumer(AsyncWebsocketConsumer):
+  async def connect(self):
+    await self.accept()
+    await self.main()
+
+  async def disconnect(self, close_code):
+    print(f'Update periodically websocket disconnected {close_code}')
+
+  async def send_json_list(self):
+    while True:
+      for json_update in json_list_persistent:
+        await self.send(json.dumps(json_update))
+        await asyncio.sleep(0.1)
+      await asyncio.sleep(UPDATE_DELAY)
+
+  async def handle_disconnection_exception(self, tasks):
+    for task in tasks:
+      task.cancel()
+
+  async def main(self):
+    tasks = []
+    send_persistent_list = asyncio.create_task(self.send_json_list())
+
+    tasks.extend([send_persistent_list])
+    await asyncio.gather(*tasks)
+    await self.handle_disconnection_exception(tasks) 
+
+
 def get_post_consumer_instance():
   global post_consumer_instance
   return post_consumer_instance
@@ -73,10 +102,9 @@ def append_json_to_list(data, json_list):
   if not drone_already_on_array:
     json_list.append(data)
 
-  print(json_list)
-
 
 json_list_persistent = []
+UPDATE_DELAY = 20
 
 async_serial = SerialConnection()
 post_consumer_instance = None

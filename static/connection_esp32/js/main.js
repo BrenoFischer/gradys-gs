@@ -1,6 +1,7 @@
 var observableSocket = new WebSocket('ws://localhost:8000/ws/connection/');
 var sendCommandSocket = new WebSocket('ws://localhost:8000/ws/receive/');
-var receivePostSocket = new WebSocket('ws://localhost:8000/ws/post/');
+var receivePostSocket = new WebSocket('ws://localhost:8000/ws/update-drone/');
+var updateSocket = new WebSocket('ws://localhost:8000/ws/update-periodically/');
 
 
 function notifyUiWhenJsonSent(jsonSent) {
@@ -82,6 +83,10 @@ observableSocket.onmessage = function(msg) {
   checkJsonType(msg);
 }
 
+updateSocket.onmessage = function(msg) {
+  checkJsonType(msg);
+}
+
 
 //On close functions
 //-------------------
@@ -95,6 +100,10 @@ sendCommandSocket.onclose = function(e) {
 
 receivePostSocket.onclose = function(e) {
   console.error('Receive POST socket closed unexpectedly');
+}
+
+updateSocket.onclose = function(e) {
+  console.error('Update socket closed unexpectedly');
 }
 
 
