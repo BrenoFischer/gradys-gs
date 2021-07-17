@@ -177,8 +177,9 @@ class SerialConnection():
 
 
   async def start_serial_connection(self, websocket):
-    await websocket.send(json.dumps(self.handshake_json))
-    await self.connect_serial(websocket)
+    if self.is_connected == False:
+      await websocket.send(json.dumps(self.handshake_json))
+      await self.connect_serial(websocket)
     while True:
       if self.is_connected:
         await websocket.send(json.dumps(self.connected_json))
