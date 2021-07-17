@@ -42,6 +42,7 @@
   * Acessar localhost:8000
 <!--te-->
 
+</br>
 
 ## Dinâmica url/view e routing/consumers
 
@@ -59,7 +60,6 @@ Com a url pattern acima, ao acessar, dentro do ambiente de desenvolvimento, a ur
 Nesse projeto, é utilizada a rota mencionada acima para receber <b>requests POST</b>, com informações de devices. Queremos exibir tais informações em tela, e precisamos enviar do back-end (Django), para o front-end (HTML/Javascript). Essa conexão entre Django e Javascript é feita via <b>websocket</b>, com auxílio da biblioteca django-channels. O django-channels utiliza uma dinâmica parecida com a dinâmica url/view mencionada acima.
 </p>
 
-</br>
 #### Routing/Consumer
 <p>
 De forma similar com as requisições de determinada url para uma view, é possível definir uma rota para realizar uma conexão websocket com o django. Essa conexão dedicada é full-duplex, sendo acessada por uma <b>route</b>, disparando um método ou classe, chamada <b>consumer</b>.
