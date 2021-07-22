@@ -36,8 +36,7 @@ class PostConsumer(WebsocketConsumer):
 
   def receive_post(self, data):
     data['method'] = 'post'
-    data['time'] = get_time()
-    #print(data)
+    data['time'] = get_time().replace('"', '')
     append_json_to_list(data, json_list_persistent)
     self.send(json.dumps(data))
 
