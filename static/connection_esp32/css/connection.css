@@ -35,7 +35,16 @@ html, body {
 }
 
 .command-buttons {
-  overflow-y: auto;
+  overflow-y: scroll;
+}
+
+.command-buttons::-webkit-scrollbar {
+  display: none;
+}
+
+.command-buttons {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .select-container {
@@ -83,12 +92,13 @@ html, body {
 }
 
 .button:hover {
-  box-shadow: inset 16vw 0 0 0 var(--primary-color);
+  /*box-shadow: inset 16vw 0 0 0 var(--primary-color);*/
+  border: 2px solid var(--primary-color);
   cursor: pointer;
 }
 
 .button:active {
-  box-shadow: inset 16vw 0 0 0 var(--background-color);
+  border: 2px solid var(--white-color);
 }
 
 .log {
