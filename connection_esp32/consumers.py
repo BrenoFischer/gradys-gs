@@ -2,6 +2,7 @@ import json
 import asyncio
 import logging
 import aiohttp
+import configparser
 from datetime import date, datetime
 from .serial_connector import SerialConnection
 
@@ -42,7 +43,10 @@ class PostConsumer(AsyncWebsocketConsumer):
     post_consumer_instance = self
 
   async def send_via_post(self, text_data):
-    url = 'http://localhost:8000/receive-command-test/'
+    config = configparser.ConfigParser()
+    config.read('serial_config.ini')
+
+    url = config['post']['url']
     async with aiohttp.ClientSession() as session:
       async with session.post(url, data=json.loads(text_data)) as resp:
         response = await resp.json() 
