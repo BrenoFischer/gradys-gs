@@ -1,10 +1,11 @@
 import json
 import asyncio
+import logging
+import aiohttp
 from datetime import date, datetime
 from .serial_connector import SerialConnection
 
 from channels.generic.websocket import AsyncWebsocketConsumer
-from channels.generic.websocket import WebsocketConsumer
 
 class ReceiveCommandConsumer(AsyncWebsocketConsumer):
   async def connect(self):
@@ -28,20 +29,66 @@ class ConnectionConsumer(AsyncWebsocketConsumer):
     print(f'Connection websocket disconnected {close_code}')
 
 
-class PostConsumer(WebsocketConsumer):
-  def connect(self):
+class PostConsumer(AsyncWebsocketConsumer):
+  def __init__(self) -> None:
+      super().__init__()
+      self.logger_except = None
+      self.logger_info = None
+
+  async def connect(self):
     global post_consumer_instance
-    self.accept()
+    await self.accept()
+    self.initiate_loggers()
     post_consumer_instance = self
 
-  def receive_post(self, data):
+  async def send_via_post(self, text_data):
+    url = 'http://localhost:8000/receive-command-test/'
+    async with aiohttp.ClientSession() as session:
+      async with session.post(url, data=json.loads(text_data)) as resp:
+        response = await resp.json() 
+        #print(f'ACK: {response}')
+
+  async def receive(self, text_data):
+    #print(f'Recebeu em consumer:{text_data}')
+    await self.send_via_post(text_data)
+
+  async def receive_post(self, data):
     data['method'] = 'post'
     data['time'] = get_time().replace('"', '')
-    append_json_to_list(data, json_list_persistent)
-    self.send(json.dumps(data))
 
-  def disconnect(self, close_code):
+    append_json_to_list(data, json_list_persistent)
+
+    if self.logger_info != None:
+      self.logger_info.info(data)
+    try:
+      await self.send(json.dumps(data))
+    except Exception:
+      if self.logger_except != None:
+        self.logger_except.exception('')
+
+  async def disconnect(self, close_code):
     print(f'Post websocket disconnected {close_code}')
+
+  def setup_logger(self, name, log_file, my_format, level=logging.INFO):
+    formatter = logging.Formatter(my_format)
+    handler = logging.FileHandler(log_file)
+    handler.setFormatter(formatter)
+
+    lo = logging.getLogger(name)
+    lo.setLevel(level)
+    lo.addHandler(handler)
+
+    return lo
+
+  def initiate_loggers(self):
+    time_now = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+    path = "./connection_esp32/LOGS/"
+
+    log_file_name_exc = path + f'exceptions/post-{time_now}.log'
+    self.logger_except = self.setup_logger('log_exception', log_file_name_exc, '%(lineno)d: %(asctime)s %(message)s', level=logging.ERROR)
+
+    log_file_name_info = path + f'info/post-{time_now}.log'
+    self.logger_info = self.setup_logger('log_info', log_file_name_info, '%(asctime)s %(message)s', level=logging.INFO)
 
 
 class UpdatePeriodcallyConsumer(AsyncWebsocketConsumer):

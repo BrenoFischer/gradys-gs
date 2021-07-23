@@ -130,41 +130,61 @@ document.querySelector('#turn-off').onclick = function(e) {
 };
 
 document.querySelector('#forward-1').onclick = function(e) {
+  json_to_send = JSON.stringify(
+    {id: 1, type: 24, seq: 0, lat: -9, log: 10, high: 11, DATA: "0"}
+  );
+
   if (sendCommandSocket.readyState == WebSocket.OPEN) {
-    json_to_send = JSON.stringify(
-      {id: 1, type: 24, seq: 0, lat: -9, log: 10, high: 11, DATA: "0"}
-    );
     sendCommandSocket.send(json_to_send);
+    notifyUiWhenJsonSent(json_to_send);
+  }
+  if (receivePostSocket.readyState == WebSocket.OPEN) {
+    receivePostSocket.send(json_to_send);
     notifyUiWhenJsonSent(json_to_send);
   }
 };
 
 document.querySelector('#forward-2').onclick = function(e) {
+  json_to_send = JSON.stringify(
+    {id: 1, type: 26, seq: 0, lat: -9, log: 10, high: 11, DATA: "0"}
+  );
+
   if (sendCommandSocket.readyState == WebSocket.OPEN) {
-    json_to_send = JSON.stringify(
-      {id: 1, type: 26, seq: 0, lat: -9, log: 10, high: 11, DATA: "0"}
-    );
     sendCommandSocket.send(json_to_send);
+    notifyUiWhenJsonSent(json_to_send);
+  }
+  if (receivePostSocket.readyState == WebSocket.OPEN) {
+    receivePostSocket.send(json_to_send);
     notifyUiWhenJsonSent(json_to_send);
   }
 };
 
 document.querySelector('#initiate-flight').onclick = function(e) {
+  json_to_send = JSON.stringify(
+    {id: 1, type: 28, seq: 0, lat: -9, log: 10, high: 11, DATA: "0"}
+  );
+
   if (sendCommandSocket.readyState == WebSocket.OPEN) {
-    json_to_send = JSON.stringify(
-      {id: 1, type: 28, seq: 0, lat: -9, log: 10, high: 11, DATA: "0"}
-    );
     sendCommandSocket.send(json_to_send);
+    notifyUiWhenJsonSent(json_to_send);
+  }
+  if (receivePostSocket.readyState == WebSocket.OPEN) {
+    receivePostSocket.send(json_to_send);
     notifyUiWhenJsonSent(json_to_send);
   }
 };
 
 document.querySelector('#interrupt-flight').onclick = function(e) {
+  json_to_send = JSON.stringify(
+    {id: 1, type: 30, seq: 0, lat: -9, log: 10, high: 11, DATA: "0"}
+  );
+
   if (sendCommandSocket.readyState == WebSocket.OPEN) {
-    json_to_send = JSON.stringify(
-      {id: 1, type: 30, seq: 0, lat: -9, log: 10, high: 11, DATA: "0"}
-    );
     sendCommandSocket.send(json_to_send);
+    notifyUiWhenJsonSent(json_to_send);
+  }
+  if (receivePostSocket.readyState == WebSocket.OPEN) {
+    receivePostSocket.send(json_to_send);
     notifyUiWhenJsonSent(json_to_send);
   }
 };
