@@ -39,7 +39,12 @@ class GoogleMaps {
       let marker = new google.maps.Marker({
         position: myLatLng,
         title: "Drone " + id,
-        icon: icon
+        //icon: icon,
+        label: {
+          text: id.toString(),
+          fontSize: "15px",
+          fontWeight: "bold",
+        }
       });
       this.markers.push(new MyMarker(id, marker));
       marker.setMap(this.map);
