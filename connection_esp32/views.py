@@ -3,6 +3,7 @@ from django.conf import settings
 from django.http import JsonResponse
 from .consumers import get_post_consumer_instance
 from django.views.decorators.csrf import csrf_exempt
+from asgiref.sync import async_to_sync, sync_to_async
 
 
 def index(request):
@@ -26,7 +27,8 @@ def create_new_dict(request_received):
   return new_dict
 
 @csrf_exempt 
-def post_to_socket(request):
+@async_to_sync
+async def post_to_socket(request):
   # Start ACK with an error code on type (101?).
   # If the post is sent to the consumer, the type is 103.
   ack = {"id": 1, "type": 101, "seq": 0, "lat": 0, "log": 0, "high": 0, "DATA": "0"}
@@ -36,7 +38,7 @@ def post_to_socket(request):
 
     post_consumer_instance = get_post_consumer_instance()
     if post_consumer_instance is not None:
-      post_consumer_instance.receive_post(new_dict)
+      await post_consumer_instance.receive_post(new_dict)
       ack['type'] = 103
 
   return JsonResponse(ack)
