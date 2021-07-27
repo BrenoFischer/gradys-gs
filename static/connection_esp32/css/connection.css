@@ -11,6 +11,7 @@ html, body {
   height: 100%;
   background-color: var(--background-color);
   color: var(--white-color);
+  font-size: 20px;
 }
 
 * {
@@ -56,6 +57,7 @@ html, body {
 }
 
 #select-device {
+  font-size: 16px;
   cursor: pointer;
   margin-top: 10px;
   padding: 5px;
@@ -80,29 +82,30 @@ html, body {
 }
 
 .button {
+  font-size: 16px;
   margin-top: 10px;
   background: var(--background-color);
   color: var(--white-color);
   width: 16vw;
   height: 40px;
   padding: 8px;
-  border: 2px solid var(--white-color);
+  border: 3px solid var(--white-color);
   box-shadow: inset 0 0 0 0 var(--primary-color);
   transition: 100ms linear;
 }
 
 .button:hover {
   /*box-shadow: inset 16vw 0 0 0 var(--primary-color);*/
-  border: 2px solid var(--primary-color);
+  border: 3px solid var(--primary-color);
   cursor: pointer;
 }
 
 .button:active {
-  border: 2px solid var(--white-color);
+  border: 3px solid var(--white-color);
 }
 
 .log {
-  font-size: 15px;
+  font-size: 18px;
   overflow-y: auto;
 }
 
@@ -124,6 +127,8 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
+  gap: 8px;
 }
 
 #connected {

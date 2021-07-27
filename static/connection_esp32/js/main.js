@@ -7,10 +7,10 @@ var updateSocket = new WebSocket('ws://localhost:8000/ws/update-periodically/');
 function notifyUiWhenJsonSent(jsonSent) {
   var element = document.getElementById('actions-logs');
   var p = document.createElement("p");
-  p.appendChild(document.createTextNode("JSON enviado: " + jsonSent));
+  p.appendChild(document.createTextNode("Command sent: " + jsonSent));
   p.className += "json-sent";
 
-  element.appendChild(p);
+  element.prepend(p);
 }
 
 function notifyUiWhenJsonReceived(jsonReceived, msg) {
@@ -19,7 +19,7 @@ function notifyUiWhenJsonReceived(jsonReceived, msg) {
   p.appendChild(document.createTextNode(msg + jsonReceived));
   p.className += "json-received";
 
-  element.appendChild(p);
+  element.prepend(p);
 }
 
 function checkJsonType(msg) {
@@ -28,14 +28,16 @@ function checkJsonType(msg) {
     console.log(djangoData);
     json_type = djangoData['type'];
 
-    msgUi = "JSON recebido: ";
+    msgUi = "ACK: ";
     msgDefault = "JSON unknown: ";
-    msgDrone = "Drone info JSON: ";
+    msgDrone = "UAV info: ";
 
     switch(json_type) {
       case 13:  //Esperando conexão
-        document.querySelector('#disconnected').innerText = "Esperando conexão serial...";
-        document.querySelector('#connected').innerText = "";
+        //document.querySelector('#disconnected').innerText = "IP: OK | UART: OFF";
+        //document.querySelector('#connected').innerText = "";
+        document.querySelector('#connected').innerText = "IP: OK";
+        document.querySelector('#disconnected').innerText = "UART: OFF";
         break;
       case 14:  //Conectado
         document.querySelector('#disconnected').innerText = "";

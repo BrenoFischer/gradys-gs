@@ -13,6 +13,7 @@ class GoogleMaps {
       this.map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: -15.84163738782225, lng: -47.92686308971462 },
         zoom: 16,
+        mapTypeId: 'satellite',
       });
     };
   }
