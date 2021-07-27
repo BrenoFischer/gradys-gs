@@ -22,36 +22,41 @@ class GoogleMaps {
     return this.markers.findIndex(marker => marker.id === id);
   }
 
-  newMarker(id, lat, log) {
+  get_color(status) {
+    if(status == 'active') return "green";
+    if(status == 'inactive') return "red";
+    return "yellow";
+  }
+
+  newMarker(id, lat, log, status) {
     let foundedMarkerIndex = this.findMarkerIdIndex(id);
 
     if(foundedMarkerIndex == -1) {
-      const icon_images = ['pin', 'pinRed', 'pinPurple', 'pinYellow']
-      const url_icon = (id >= 5 && id <= 8) ? icon_images[id-5] : 'pin';
-      let icon_image = `../static/connection_esp32/images/${url_icon}.png`;
-      let icon = {
-        url: icon_image,
-        size: new google.maps.Size(43, 41),
-        origin: new google.maps.Point(0,0),
-        anchor: new google.maps.Point(21, 41)
-      };
+      const markerColor = this.get_color(status);
+      const image = `https://raw.githubusercontent.com/Concept211/Google-Maps-Markers/master/images/marker_${markerColor}${id}.png`;
 
       let myLatLng = new google.maps.LatLng(lat,log);
       let marker = new google.maps.Marker({
         position: myLatLng,
         title: "Drone " + id,
-        //icon: icon,
-        label: {
-          text: id.toString(),
-          fontSize: "15px",
-          fontWeight: "bold",
-        }
+        icon: image,
+        //label: {
+        //  text: id.toString(),
+        //  fontSize: "20px",
+        //  fontWeight: "bold",
+        //}
       });
       this.markers.push(new MyMarker(id, marker));
       marker.setMap(this.map);
     }
     else {
-      let myLatLng = new google.maps.LatLng(lat,log);
+      const myLatLng = new google.maps.LatLng(lat,log);
+      const markerColor = this.get_color(status);
+      const image = `https://raw.githubusercontent.com/Concept211/Google-Maps-Markers/master/images/marker_${markerColor}${id}.png`;
+
+      //can change .setVisible(false) if wanna hide
+      //can change .setOpacity, between 0.0 and 1.0.
+      this.markers[foundedMarkerIndex].marker.setIcon(image)
       this.markers[foundedMarkerIndex].marker.setPosition(myLatLng);
     }
   }

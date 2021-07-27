@@ -63,10 +63,11 @@ function checkJsonType(msg) {
         break;
       case 102: //Informação drone recebido
         notifyUiWhenJsonReceived(msg.data, msgDrone);
-        let id = djangoData['id'];
-        let lat = parseFloat(djangoData['lat']);
-        let log = parseFloat(djangoData['log']);
-        gmap.newMarker(id, lat, log);
+        const id = djangoData['id'];
+        const lat = parseFloat(djangoData['lat']);
+        const log = parseFloat(djangoData['log']);
+        const status = djangoData['status'];
+        gmap.newMarker(id, lat, log, status);
         break;
       default:
         notifyUiWhenJsonReceived(msg.data, msgDefault);
