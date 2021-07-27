@@ -151,6 +151,7 @@ class SerialConnection():
       self.queue.task_done()
       json_consumed['method'] = 'serial'
       json_consumed['time'] = get_time()
+      json_consumed['status'] = 'active'
 
       json_list_persistent = get_json_list_persistent()
       append_json_to_list(json_consumed, json_list_persistent)
@@ -162,7 +163,7 @@ class SerialConnection():
 
 
   async def connect_serial(self, websocket):
-    print("Tentando conexão com a serial...")
+    #print("Tentando conexão com a serial...")
     try:
       self.aio_instance = aioserial.AioSerial(port=self.port, baudrate=self.baudrate)
       self.aio_instance.flush()

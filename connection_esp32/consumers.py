@@ -3,11 +3,13 @@ import asyncio
 import logging
 import aiohttp
 import configparser
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from .serial_connector import SerialConnection
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 
+# Consumers
+#--------------
 class ReceiveCommandConsumer(AsyncWebsocketConsumer):
   async def connect(self):
     await self.accept()
@@ -54,11 +56,15 @@ class PostConsumer(AsyncWebsocketConsumer):
 
   async def receive(self, text_data):
     #print(f'Recebeu em consumer:{text_data}')
+    if self.logger_info != None:
+      self.logger_info.info(text_data)
+    
     await self.send_via_post(text_data)
 
   async def receive_post(self, data):
     data['method'] = 'post'
     data['time'] = get_time().replace('"', '')
+    data['status'] = 'active'
 
     append_json_to_list(data, json_list_persistent)
 
@@ -104,8 +110,17 @@ class UpdatePeriodcallyConsumer(AsyncWebsocketConsumer):
     print(f'Update periodically websocket disconnected {close_code}')
 
   async def send_json_list(self):
+    date_format = "%Y-%m-%dT%H:%M:%S.%f"
+
     while True:
+      time_now = datetime.now()
+      seconds_to_be_inactive = 50
+      seconds_to_be_on_hold = 25
+
       for json_update in json_list_persistent:
+        time_shifted_inactive = datetime.strptime(json_update['time'], date_format) + timedelta(seconds = seconds_to_be_inactive)
+        time_shifted_on_hold = datetime.strptime(json_update['time'], date_format) + timedelta(seconds = seconds_to_be_on_hold)
+        json_update['status'] = insert_activity_flag(time_now, time_shifted_inactive, time_shifted_on_hold)
         await self.send(json.dumps(json_update))
         await asyncio.sleep(0.1)
       await asyncio.sleep(UPDATE_DELAY)
@@ -123,6 +138,8 @@ class UpdatePeriodcallyConsumer(AsyncWebsocketConsumer):
     await self.handle_disconnection_exception(tasks) 
 
 
+# Auxiliary functions
+# -------------------
 def get_post_consumer_instance():
   global post_consumer_instance
   return post_consumer_instance
@@ -138,6 +155,15 @@ def json_serializer(obj):
 
 def get_time():
   return json.dumps(datetime.now(), default=json_serializer)
+
+
+def insert_activity_flag(time_now, time_to_inactive, time_to_on_hold):
+  if time_now >= time_to_inactive:
+    return 'inactive'
+  if time_now >= time_to_on_hold:
+    return 'on_hold'
+  return 'active' 
+  
 
 def append_json_to_list(data, json_list):
   drone_already_on_array = False
