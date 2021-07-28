@@ -22,18 +22,25 @@ class GoogleMaps {
     return this.markers.findIndex(marker => marker.id === id);
   }
 
-  get_color(status) {
+  getMarkerColor(status) {
     if(status == 'active') return "green";
     if(status == 'inactive') return "red";
     return "yellow";
   }
 
-  newMarker(id, lat, log, status) {
+  getMarkerImage(id, status, deviceType) {
+    const markerColor = this.getMarkerColor(status);
+    return deviceType == 'uav' ? 
+      `https://raw.githubusercontent.com/Concept211/Google-Maps-Markers/master/images/marker_${markerColor}${id}.png`
+    :
+      `https://raw.githubusercontent.com/Concept211/Google-Maps-Markers/master/images/marker_black${id}.png`;
+  }
+
+  newMarker(id, lat, log, status, deviceType) {
     let foundedMarkerIndex = this.findMarkerIdIndex(id);
 
     if(foundedMarkerIndex == -1) {
-      const markerColor = this.get_color(status);
-      const image = `https://raw.githubusercontent.com/Concept211/Google-Maps-Markers/master/images/marker_${markerColor}${id}.png`;
+      const image = this.getMarkerImage(id, status, deviceType);
 
       let myLatLng = new google.maps.LatLng(lat,log);
       let marker = new google.maps.Marker({
@@ -51,12 +58,11 @@ class GoogleMaps {
     }
     else {
       const myLatLng = new google.maps.LatLng(lat,log);
-      const markerColor = this.get_color(status);
-      const image = `https://raw.githubusercontent.com/Concept211/Google-Maps-Markers/master/images/marker_${markerColor}${id}.png`;
+      const image = this.getMarkerImage(id, status, deviceType);
 
       //can change .setVisible(false) if wanna hide
       //can change .setOpacity, between 0.0 and 1.0.
-      this.markers[foundedMarkerIndex].marker.setIcon(image)
+      this.markers[foundedMarkerIndex].marker.setIcon(image);
       this.markers[foundedMarkerIndex].marker.setPosition(myLatLng);
     }
   }

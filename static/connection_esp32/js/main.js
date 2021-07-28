@@ -67,7 +67,8 @@ function checkJsonType(msg) {
         const lat = parseFloat(djangoData['lat']);
         const log = parseFloat(djangoData['log']);
         const status = djangoData['status'];
-        gmap.newMarker(id, lat, log, status);
+        const deviceType = djangoData['device'];
+        gmap.newMarker(id, lat, log, status, deviceType);
         break;
       default:
         notifyUiWhenJsonReceived(msg.data, msgDefault);

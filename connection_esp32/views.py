@@ -24,6 +24,7 @@ def create_new_dict(request_received):
   new_dict['log'] = float(request_received.POST.get('log'))
   new_dict['high'] = float(request_received.POST.get('high'))
   new_dict['DATA'] = request_received.POST.get('DATA')
+  new_dict['device'] = request_received.POST.get('device')
   return new_dict
 
 @csrf_exempt 
