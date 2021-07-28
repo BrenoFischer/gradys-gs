@@ -56,7 +56,7 @@ class SerialConnection():
 
   def __init__(self):
     config = configparser.ConfigParser()
-    config.read('serial_config.ini')
+    config.read('config.ini')
     
     self.aio_instance = None
     self.is_connected = False
@@ -150,7 +150,7 @@ class SerialConnection():
       json_consumed = await self.queue.get()
       self.queue.task_done()
       json_consumed['method'] = 'serial'
-      json_consumed['time'] = get_time()
+      json_consumed['time'] = get_time().replace('"', '')
       json_consumed['status'] = 'active'
 
       json_list_persistent = get_json_list_persistent()
