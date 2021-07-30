@@ -3,6 +3,35 @@ var sendCommandSocket = new WebSocket('ws://localhost:8000/ws/receive/');
 var receivePostSocket = new WebSocket('ws://localhost:8000/ws/update-drone/');
 var updateSocket = new WebSocket('ws://localhost:8000/ws/update-periodically/');
 
+var activeDevicesId = []
+
+
+function verifyActiveDevices(id) {
+  let match = false;
+  activeDevicesId.forEach((deviceId) => {
+    if(deviceId == id) match = true;
+  });
+  return match;
+}
+
+function pushNewCommandOption(id, deviceType) {
+  var selectElement = document.getElementById('select-device');
+  var opt = new Option(`${deviceType}${id}`, id);
+  selectElement.add(opt);
+}
+
+function removeCommandOption(id) {
+  var matchingId = -1;
+  var selectElement = document.getElementById('select-device');
+
+  [...document.getElementById('select-device').children].forEach((option, index) => {
+    if(option.value == id) matchingId = index;
+  });
+  if(matchingId != -1) {
+    selectElement.remove(matchingId);
+    activeDevicesId = activeDevicesId.filter(deviceId => id !== deviceId);
+  }
+}
 
 function notifyUiWhenJsonSent(jsonSent) {
   var element = document.getElementById('actions-logs');
@@ -62,12 +91,27 @@ function checkJsonType(msg) {
         notifyUiWhenJsonReceived(msg.data, msgUi);
         break;
       case 102: //Informação drone recebido
-        notifyUiWhenJsonReceived(msg.data, msgDrone);
         const id = djangoData['id'];
         const lat = parseFloat(djangoData['lat']);
         const log = parseFloat(djangoData['log']);
         const status = djangoData['status'];
         const deviceType = djangoData['device'];
+
+        //Adiciona novo device nas opções de comando
+        if(!verifyActiveDevices(id)){
+          if(status != "inactive") {
+            activeDevicesId.push(id);
+            pushNewCommandOption(id, deviceType);
+          }
+        }
+        else {
+          //Retira device se está nas opções e está inativo
+          if(status == "inactive") {
+            removeCommandOption(id);
+          }
+        }
+
+        notifyUiWhenJsonReceived(msg.data, msgDrone);
         gmap.newMarker(id, lat, log, status, deviceType);
         break;
       default:
