@@ -45,13 +45,90 @@ async def post_to_socket(request):
   return JsonResponse(ack)
 
 @csrf_exempt
-def receive_command_test(request):
+def receive_command_test1(request):
   # View temporária simulando um UAV como servidor web, que irá receber um comando da GS
   ack = {"id": 1, "type": -1, "seq": 0, "lat": 0, "log": 0, "high": 0, "DATA": "0"}
   
   if request.method == 'POST':
-    #print('Recebeu comando no UAV!')
     type = int(request.POST.get('type'))
+    print(f'O device com id: 1 recebeu o comando {type}')
+    if type == 24:
+      ack['type'] = 25
+    if type == 26:
+      ack['type'] = 27
+    if type == 28:
+      ack['type'] = 29
+    if type == 30:
+      ack['type'] = 31
+
+  return JsonResponse(ack)
+
+@csrf_exempt
+def receive_command_test2(request):
+  # View temporária simulando um UAV como servidor web, que irá receber um comando da GS
+  ack = {"id": 1, "type": -1, "seq": 0, "lat": 0, "log": 0, "high": 0, "DATA": "0"}
+  
+  if request.method == 'POST':
+    type = int(request.POST.get('type'))
+    print(f'O device com id: 2 recebeu o comando {type}')
+    if type == 24:
+      ack['type'] = 25
+    if type == 26:
+      ack['type'] = 27
+    if type == 28:
+      ack['type'] = 29
+    if type == 30:
+      ack['type'] = 31
+
+  return JsonResponse(ack)
+
+@csrf_exempt
+def receive_command_test3(request):
+  # View temporária simulando um UAV como servidor web, que irá receber um comando da GS
+  ack = {"id": 1, "type": -1, "seq": 0, "lat": 0, "log": 0, "high": 0, "DATA": "0"}
+  
+  if request.method == 'POST':
+    type = int(request.POST.get('type'))
+    print(f'O device com id: 3 recebeu o comando {type}')
+    if type == 24:
+      ack['type'] = 25
+    if type == 26:
+      ack['type'] = 27
+    if type == 28:
+      ack['type'] = 29
+    if type == 30:
+      ack['type'] = 31
+
+  return JsonResponse(ack)
+
+@csrf_exempt
+def receive_command_test4(request):
+  # View temporária simulando um UAV como servidor web, que irá receber um comando da GS
+  ack = {"id": 1, "type": -1, "seq": 0, "lat": 0, "log": 0, "high": 0, "DATA": "0"}
+  
+  if request.method == 'POST':
+    type = int(request.POST.get('type'))
+    print(f'O device com id: 4 recebeu o comando {type}')
+    if type == 24:
+      ack['type'] = 25
+    if type == 26:
+      ack['type'] = 27
+    if type == 28:
+      ack['type'] = 29
+    if type == 30:
+      ack['type'] = 31
+
+  return JsonResponse(ack)
+
+
+@csrf_exempt
+def receive_command_test5(request):
+  # View temporária simulando um UAV como servidor web, que irá receber um comando da GS
+  ack = {"id": 1, "type": -1, "seq": 0, "lat": 0, "log": 0, "high": 0, "DATA": "0"}
+  
+  if request.method == 'POST':
+    type = int(request.POST.get('type'))
+    print(f'O device com id: 5 recebeu o comando {type}')
     if type == 24:
       ack['type'] = 25
     if type == 26:

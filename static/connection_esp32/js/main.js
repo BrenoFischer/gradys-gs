@@ -6,6 +6,31 @@ var updateSocket = new WebSocket('ws://localhost:8000/ws/update-periodically/');
 var activeDevicesId = []
 
 
+function sendCommand(type) {
+  jsonToSend = {id: 1, type: type, seq: 0, lat: -9, log: 10, high: 11, DATA: "0"}
+  jsonToSend["receiver"] = addDeviceReceiver();
+  
+  jsonToSend = JSON.stringify(jsonToSend);
+  console.log(jsonToSend);
+
+  if (sendCommandSocket.readyState == WebSocket.OPEN) {
+    //sendCommandSocket.send(jsonToSend);
+    //notifyUiWhenJsonSent(jsonToSend);
+  }
+  if (receivePostSocket.readyState == WebSocket.OPEN) {
+    receivePostSocket.send(jsonToSend);
+    notifyUiWhenJsonSent(jsonToSend);
+  }
+}
+
+
+function addDeviceReceiver() {
+  selectElement = document.getElementById('select-device');
+  selectedDeviceId = selectElement.value;
+
+  return selectedDeviceId;
+}
+
 function verifyActiveDevices(id) {
   let match = false;
   activeDevicesId.forEach((deviceId) => {
@@ -16,7 +41,7 @@ function verifyActiveDevices(id) {
 
 function pushNewCommandOption(id, deviceType) {
   var selectElement = document.getElementById('select-device');
-  var opt = new Option(`${deviceType}${id}`, id);
+  var opt = new Option(`${deviceType.toUpperCase()} ${id}`, id);
   selectElement.add(opt);
 }
 
@@ -158,81 +183,25 @@ updateSocket.onclose = function(e) {
 // Onclick functions
 //-------------------
 document.querySelector('#turn-on').onclick = function(e) {
-  if (sendCommandSocket.readyState == WebSocket.OPEN) {
-    json_to_send = JSON.stringify(
-      {id: 1, type: 20, seq: 0, lat: -9, log: 10, high: 11, DATA: "0"}
-    );
-    //sendCommandSocket.send(json_to_send);
-    //notifyUiWhenJsonSent(json_to_send);
-  }
+  sendCommand(20);
 };
 
 document.querySelector('#turn-off').onclick = function(e) {
-  if (sendCommandSocket.readyState == WebSocket.OPEN) {
-    json_to_send = JSON.stringify(
-      {id: 1, type: 22, seq: 0, lat: -9, log: 10, high: 11, DATA: "0"}
-    );
-    //sendCommandSocket.send(json_to_send);
-    //notifyUiWhenJsonSent(json_to_send);
-  }
+  sendCommand(22);
 };
 
 document.querySelector('#forward-1').onclick = function(e) {
-  json_to_send = JSON.stringify(
-    {id: 1, type: 24, seq: 0, lat: -9, log: 10, high: 11, DATA: "0"}
-  );
-
-  if (sendCommandSocket.readyState == WebSocket.OPEN) {
-    //sendCommandSocket.send(json_to_send);
-    //notifyUiWhenJsonSent(json_to_send);
-  }
-  if (receivePostSocket.readyState == WebSocket.OPEN) {
-    receivePostSocket.send(json_to_send);
-    notifyUiWhenJsonSent(json_to_send);
-  }
+  sendCommand(24);
 };
 
 document.querySelector('#forward-2').onclick = function(e) {
-  json_to_send = JSON.stringify(
-    {id: 1, type: 26, seq: 0, lat: -9, log: 10, high: 11, DATA: "0"}
-  );
-
-  if (sendCommandSocket.readyState == WebSocket.OPEN) {
-    //sendCommandSocket.send(json_to_send);
-    //notifyUiWhenJsonSent(json_to_send);
-  }
-  if (receivePostSocket.readyState == WebSocket.OPEN) {
-    receivePostSocket.send(json_to_send);
-    notifyUiWhenJsonSent(json_to_send);
-  }
+  sendCommand(26);
 };
 
 document.querySelector('#initiate-flight').onclick = function(e) {
-  json_to_send = JSON.stringify(
-    {id: 1, type: 28, seq: 0, lat: -9, log: 10, high: 11, DATA: "0"}
-  );
-
-  if (sendCommandSocket.readyState == WebSocket.OPEN) {
-    //sendCommandSocket.send(json_to_send);
-    //notifyUiWhenJsonSent(json_to_send);
-  }
-  if (receivePostSocket.readyState == WebSocket.OPEN) {
-    receivePostSocket.send(json_to_send);
-    notifyUiWhenJsonSent(json_to_send);
-  }
+  sendCommand(28);
 };
 
 document.querySelector('#interrupt-flight').onclick = function(e) {
-  json_to_send = JSON.stringify(
-    {id: 1, type: 30, seq: 0, lat: -9, log: 10, high: 11, DATA: "0"}
-  );
-
-  if (sendCommandSocket.readyState == WebSocket.OPEN) {
-    //sendCommandSocket.send(json_to_send);
-    //notifyUiWhenJsonSent(json_to_send);
-  }
-  if (receivePostSocket.readyState == WebSocket.OPEN) {
-    receivePostSocket.send(json_to_send);
-    notifyUiWhenJsonSent(json_to_send);
-  }
+  sendCommand(30);
 };

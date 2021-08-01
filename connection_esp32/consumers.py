@@ -47,14 +47,30 @@ class PostConsumer(AsyncWebsocketConsumer):
     post_consumer_instance = self
 
   async def send_via_post(self, text_data):
+    device_id = str(json.loads(text_data)['receiver'])
     config = configparser.ConfigParser()
     config.read('config.ini')
 
-    url = config['post']['url']
-    async with aiohttp.ClientSession() as session:
-      async with session.post(url, data=json.loads(text_data)) as resp:
-        response = await resp.json() 
-        #print(f'ACK: {response}')
+    base_url = config['post']['base_url']
+    paths = json.loads(config.get('post','paths'))
+
+    # Device com ID = 0 é o comando "Send to all"
+    if device_id == "0":
+      async with aiohttp.ClientSession() as session:
+        for path in paths:
+          url = base_url + path
+
+          async with session.post(url, data=json.loads(text_data)) as resp:
+            response = await resp.json()
+            #await asyncio.sleep(0.1)
+            #print(f'ACK: {response}')
+    else:
+      url = base_url + paths[int(device_id) - 1]
+    
+      async with aiohttp.ClientSession() as session:
+        async with session.post(url, data=json.loads(text_data)) as resp:
+          response = await resp.json() 
+          #print(f'ACK: {response}')
 
   async def receive(self, text_data):
     #print(f'Recebeu em consumer:{text_data}')
