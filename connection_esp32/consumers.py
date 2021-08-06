@@ -47,30 +47,37 @@ class PostConsumer(AsyncWebsocketConsumer):
     post_consumer_instance = self
 
   async def send_via_post(self, text_data):
-    device_id = str(json.loads(text_data)['receiver'])
     config = configparser.ConfigParser()
     config.read('config.ini')
+    received_json = json.loads(text_data)
 
-    base_url = config['post']['base_url']
-    paths = json.loads(config.get('post','paths'))
+    if received_json.get('ip') is not None:
+      ip = str(received_json['ip'])
+    else:
+      ip = config['post']['ip']
+
+    base_path = config['post']['base_path']
+    device_id = str(received_json['receiver'])
+    command_code = str(received_json['type'])
 
     # Device com ID = 0 é o comando "Send to all"
-    if device_id == "0":
-      async with aiohttp.ClientSession() as session:
-        for path in paths:
-          url = base_url + path
+    #if device_id == "0":
+    #  async with aiohttp.ClientSession() as session:
+        #Paralel for, testar multi thread pool.
+    #    for path in paths:
+    #      ip = base_ip + path
 
-          async with session.post(url, data=json.loads(text_data)) as resp:
-            response = await resp.json()
+    #      async with session.post(ip, data=json.loads(text_data)) as resp:
+    #        response = await resp.json()
             #await asyncio.sleep(0.1)
             #print(f'ACK: {response}')
-    else:
-      url = base_url + paths[int(device_id) - 1]
     
-      async with aiohttp.ClientSession() as session:
-        async with session.post(url, data=json.loads(text_data)) as resp:
-          response = await resp.json() 
-          #print(f'ACK: {response}')
+    url = ip + base_path + device_id + '/' + command_code + '/'
+  
+    async with aiohttp.ClientSession() as session:
+      async with session.post(url, data=received_json) as resp:
+        response = await resp.json() 
+        #print(f'ACK: {response}')
 
   async def receive(self, text_data):
     #print(f'Recebeu em consumer:{text_data}')

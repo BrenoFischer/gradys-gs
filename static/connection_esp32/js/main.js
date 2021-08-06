@@ -3,38 +3,76 @@ var sendCommandSocket = new WebSocket('ws://localhost:8000/ws/receive/');
 var receivePostSocket = new WebSocket('ws://localhost:8000/ws/update-drone/');
 var updateSocket = new WebSocket('ws://localhost:8000/ws/update-periodically/');
 
-var activeDevicesId = []
+var activeDevices = []
 
 
-function sendCommand(type) {
-  jsonToSend = {id: 1, type: type, seq: 0, lat: -9, log: 10, high: 11, DATA: "0"}
-  jsonToSend["receiver"] = addDeviceReceiver();
-  
+function sendCommandSingleDevice(jsonToSend) {
   jsonToSend = JSON.stringify(jsonToSend);
   console.log(jsonToSend);
 
-  if (sendCommandSocket.readyState == WebSocket.OPEN) {
-    //sendCommandSocket.send(jsonToSend);
-    //notifyUiWhenJsonSent(jsonToSend);
-  }
   if (receivePostSocket.readyState == WebSocket.OPEN) {
     receivePostSocket.send(jsonToSend);
     notifyUiWhenJsonSent(jsonToSend);
   }
+  if (sendCommandSocket.readyState == WebSocket.OPEN) {
+    //sendCommandSocket.send(jsonToSend);
+    //notifyUiWhenJsonSent(jsonToSend);
+  }
 }
 
 
-function addDeviceReceiver() {
+function sendCommand(type) {
+  if(getDeviceReceiver() === "all") { //'Send to all' está selecionado, mandar para todos
+    activeDevices.forEach(device => {
+      jsonToSend = {id: 1, type: type, seq: 0, lat: -9, log: 10, high: 11, DATA: "0"}
+      jsonToSend["receiver"] = device.id;
+      jsonToSend["ip"] = device.ip;
+
+      sendCommandSingleDevice(jsonToSend);
+    });
+  }
+  else {
+    jsonToSend = {id: 1, type: type, seq: 0, lat: -9, log: 10, high: 11, DATA: "0"}
+    jsonToSend["receiver"] = getDeviceReceiver();
+    jsonToSend["ip"] = addDeviceIp();
+
+    sendCommandSingleDevice(jsonToSend);
+  }
+}
+
+
+function getMatchingIndex(id) {
+  //Retorna a posição do id encontrado, no vetor de devices ou -1 caso não encontre
+  var matchingId = -1;
+
+  [...document.getElementById('select-device').children].forEach((option, index) => {
+    if(option.value == id) matchingId = index;
+  });
+
+  return matchingId
+}
+
+
+function getDeviceReceiver() {
   selectElement = document.getElementById('select-device');
   selectedDeviceId = selectElement.value;
 
   return selectedDeviceId;
 }
 
+function addDeviceIp() {
+  selectElement = document.getElementById('select-device');
+  selectedDeviceId = selectElement.value;
+ 
+  const matchingId = getMatchingIndex(selectedDeviceId);
+  const device = activeDevices[matchingId-1];
+  return device.ip;
+}
+
 function verifyActiveDevices(id) {
   let match = false;
-  activeDevicesId.forEach((deviceId) => {
-    if(deviceId == id) match = true;
+  activeDevices.forEach((device) => {
+    if(device.id == id) match = true;
   });
   return match;
 }
@@ -46,15 +84,13 @@ function pushNewCommandOption(id, deviceType) {
 }
 
 function removeCommandOption(id) {
-  var matchingId = -1;
   var selectElement = document.getElementById('select-device');
+  const matchingId = getMatchingIndex(id);
 
-  [...document.getElementById('select-device').children].forEach((option, index) => {
-    if(option.value == id) matchingId = index;
-  });
   if(matchingId != -1) {
     selectElement.remove(matchingId);
-    activeDevicesId = activeDevicesId.filter(deviceId => id !== deviceId);
+    activeDevices = activeDevices.filter(device => id !== device.id);
+    //console.log(activeDevices);
   }
 }
 
@@ -115,8 +151,9 @@ function checkJsonType(msg) {
       case 31: //Voo abortado ACK
         notifyUiWhenJsonReceived(msg.data, msgUi);
         break;
-      case 102: //Informação drone recebido
+      case 102: //Informação do device recebido
         const id = djangoData['id'];
+        const ip = djangoData['ip'];
         const lat = parseFloat(djangoData['lat']);
         const log = parseFloat(djangoData['log']);
         const status = djangoData['status'];
@@ -125,7 +162,7 @@ function checkJsonType(msg) {
         //Adiciona novo device nas opções de comando
         if(!verifyActiveDevices(id)){
           if(status != "inactive") {
-            activeDevicesId.push(id);
+            activeDevices.push({'id': id, 'ip': ip});
             pushNewCommandOption(id, deviceType);
           }
         }
