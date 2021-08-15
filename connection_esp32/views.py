@@ -58,13 +58,13 @@ async def post_to_socket(request):
   return JsonResponse(ack)
 
 @csrf_exempt
-def receive_command_test(request, device_id, command_code):
+def receive_command_test(request, device_id):
   # View temporária simulando um UAV como servidor web, que irá receber um comando da GS
   ack = {"id": 1, "type": -1, "seq": 0, "lat": 0, "log": 0, "high": 0, "DATA": "0"}
   
   if request.method == 'POST':
     type = int(request.POST.get('type'))
-    print(f'O device com id: {device_id} recebeu o comando {command_code}')
+    print(f'O device com id: {device_id} recebeu o comando {type}')
     if type == 24:
       ack['type'] = 25
     if type == 26:

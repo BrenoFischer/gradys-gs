@@ -3,10 +3,13 @@ var sendCommandSocket = new WebSocket('ws://localhost:8000/ws/receive/');
 var receivePostSocket = new WebSocket('ws://localhost:8000/ws/update-drone/');
 var updateSocket = new WebSocket('ws://localhost:8000/ws/update-periodically/');
 
-var activeDevices = []
+var activeDevicesId = []
 
 
-function sendCommandSingleDevice(jsonToSend) {
+function sendCommand(type) {
+  jsonToSend = {id: 1, type: type, seq: 0, lat: -9, log: 10, high: 11, DATA: "0"}
+  jsonToSend["receiver"] = getDeviceReceiver();
+
   jsonToSend = JSON.stringify(jsonToSend);
   console.log(jsonToSend);
 
@@ -20,25 +23,6 @@ function sendCommandSingleDevice(jsonToSend) {
   }
 }
 
-
-function sendCommand(type) {
-  if(getDeviceReceiver() === "all") { //'Send to all' está selecionado, mandar para todos
-    activeDevices.forEach(device => {
-      jsonToSend = {id: 1, type: type, seq: 0, lat: -9, log: 10, high: 11, DATA: "0"}
-      jsonToSend["receiver"] = device.id;
-      jsonToSend["ip"] = device.ip;
-
-      sendCommandSingleDevice(jsonToSend);
-    });
-  }
-  else {
-    jsonToSend = {id: 1, type: type, seq: 0, lat: -9, log: 10, high: 11, DATA: "0"}
-    jsonToSend["receiver"] = getDeviceReceiver();
-    jsonToSend["ip"] = addDeviceIp();
-
-    sendCommandSingleDevice(jsonToSend);
-  }
-}
 
 
 function getMatchingIndex(id) {
@@ -60,19 +44,10 @@ function getDeviceReceiver() {
   return selectedDeviceId;
 }
 
-function addDeviceIp() {
-  selectElement = document.getElementById('select-device');
-  selectedDeviceId = selectElement.value;
- 
-  const matchingId = getMatchingIndex(selectedDeviceId);
-  const device = activeDevices[matchingId-1];
-  return device.ip;
-}
-
 function verifyActiveDevices(id) {
   let match = false;
-  activeDevices.forEach((device) => {
-    if(device.id == id) match = true;
+  activeDevicesId.forEach((deviceId) => {
+    if(deviceId == id) match = true;
   });
   return match;
 }
@@ -89,8 +64,8 @@ function removeCommandOption(id) {
 
   if(matchingId != -1) {
     selectElement.remove(matchingId);
-    activeDevices = activeDevices.filter(device => id !== device.id);
-    //console.log(activeDevices);
+    activeDevicesId = activeDevicesId.filter(deviceId => id !== deviceId);
+    //console.log(activeDevicesId);
   }
 }
 
@@ -162,7 +137,7 @@ function checkJsonType(msg) {
         //Adiciona novo device nas opções de comando
         if(!verifyActiveDevices(id)){
           if(status != "inactive") {
-            activeDevices.push({'id': id, 'ip': ip});
+            activeDevicesId.push(id);
             pushNewCommandOption(id, deviceType);
           }
         }

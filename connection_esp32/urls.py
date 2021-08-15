@@ -12,5 +12,5 @@ urlpatterns = [
     path('', index),
     path('connection/', connection),
     path('update-drone/', post_to_socket),
-    path(base_path + '<int:device_id>/<int:command_code>/', receive_command_test),
+    path('<int:device_id>/' + base_path, receive_command_test),
 ]

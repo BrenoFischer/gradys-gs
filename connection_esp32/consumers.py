@@ -46,20 +46,37 @@ class PostConsumer(AsyncWebsocketConsumer):
     self.initiate_loggers()
     post_consumer_instance = self
 
+  async def send_post_especific_device(self, url, json_to_send):
+    async with aiohttp.ClientSession() as session:
+      async with session.post(url, data=json_to_send) as resp:
+        response = await resp.json() 
+        #print(f'ACK: {response}')
+
   async def send_via_post(self, text_data):
     config = configparser.ConfigParser()
     config.read('config.ini')
     received_json = json.loads(text_data)
 
-    if received_json.get('ip') is not None:
-      ip = str(received_json['ip'])
-    else:
-      ip = config['post']['ip']
-
     base_path = config['post']['base_path']
     device_id = str(received_json['receiver'])
-    command_code = str(received_json['type'])
 
+    device_to_send = get_device_from_list_by_id(device_id)
+
+    if device_to_send is None:
+      print('Não tem pra quem mandar')
+    else:
+      if device_id == 'all':
+        for device in device_to_send:
+          if device['status'] != 'inactive':
+            ip = device['ip']
+            id = str(device['id'])
+            url = ip + id + '/' + base_path
+            await self.send_post_especific_device(url, received_json)
+      else:
+        if device_to_send['status'] != 'inactive':
+          ip = device_to_send['ip']
+          url = ip + device_id + '/' + base_path
+          await self.send_post_especific_device(url, received_json)
     # Device com ID = 0 é o comando "Send to all"
     #if device_id == "0":
     #  async with aiohttp.ClientSession() as session:
@@ -71,13 +88,7 @@ class PostConsumer(AsyncWebsocketConsumer):
     #        response = await resp.json()
             #await asyncio.sleep(0.1)
             #print(f'ACK: {response}')
-    
-    url = ip + base_path + device_id + '/' + command_code + '/'
   
-    async with aiohttp.ClientSession() as session:
-      async with session.post(url, data=received_json) as resp:
-        response = await resp.json() 
-        #print(f'ACK: {response}')
 
   async def receive(self, text_data):
     #print(f'Recebeu em consumer:{text_data}')
@@ -205,6 +216,19 @@ def append_json_to_list(data, json_list):
 
   if not drone_already_on_array:
     json_list.append(data)
+
+
+def get_device_from_list_by_id(id):
+  #Retorna o json do device com id passado, Retorna None caso não encontre
+  device_list = get_json_list_persistent()
+
+  if id == 'all':
+    return device_list
+
+  for device in device_list:
+    if str(device['id']) == id:
+      return device
+  return None
 
 
 json_list_persistent = []
