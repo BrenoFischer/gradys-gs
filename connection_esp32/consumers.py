@@ -39,15 +39,19 @@ class PostConsumer(AsyncWebsocketConsumer):
       super().__init__()
       self.logger_except = None
       self.logger_info = None
+      self.tasks = []
 
   async def connect(self):
     global post_consumer_instance
     await self.accept()
     self.initiate_loggers()
     post_consumer_instance = self
-
+  
   async def send_post_especific_device(self, url, json_to_send):
     async with aiohttp.ClientSession() as session:
+      device_id = url.split('/')[3]
+      if device_id == '5':
+        await asyncio.sleep(5)
       async with session.post(url, data=json_to_send) as resp:
         response = await resp.json() 
         #print(f'ACK: {response}')
@@ -71,27 +75,16 @@ class PostConsumer(AsyncWebsocketConsumer):
             ip = device['ip']
             id = str(device['id'])
             url = ip + id + '/' + base_path
-            await self.send_post_especific_device(url, received_json)
+            task = asyncio.create_task(self.send_post_especific_device(url, received_json))
+            self.tasks.append(task)
       else:
         if device_to_send['status'] != 'inactive':
           ip = device_to_send['ip']
           url = ip + device_id + '/' + base_path
           await self.send_post_especific_device(url, received_json)
-    # Device com ID = 0 é o comando "Send to all"
-    #if device_id == "0":
-    #  async with aiohttp.ClientSession() as session:
-        #Paralel for, testar multi thread pool.
-    #    for path in paths:
-    #      ip = base_ip + path
-
-    #      async with session.post(ip, data=json.loads(text_data)) as resp:
-    #        response = await resp.json()
-            #await asyncio.sleep(0.1)
-            #print(f'ACK: {response}')
   
 
   async def receive(self, text_data):
-    #print(f'Recebeu em consumer:{text_data}')
     if self.logger_info != None:
       self.logger_info.info(text_data)
     
@@ -113,6 +106,8 @@ class PostConsumer(AsyncWebsocketConsumer):
         self.logger_except.exception('')
 
   async def disconnect(self, close_code):
+    for task in self.tasks:
+      task.cancel()
     print(f'Post websocket disconnected {close_code}')
 
   def setup_logger(self, name, log_file, my_format, level=logging.INFO):
@@ -138,11 +133,17 @@ class PostConsumer(AsyncWebsocketConsumer):
 
 
 class UpdatePeriodcallyConsumer(AsyncWebsocketConsumer):
+  def __init__(self) -> None:
+    super().__init__()
+    self.tasks = []
+
   async def connect(self):
     await self.accept()
     await self.main()
 
   async def disconnect(self, close_code):
+    for task in self.tasks:
+      task.cancel()
     print(f'Update periodically websocket disconnected {close_code}')
 
   async def send_json_list(self):
@@ -164,17 +165,16 @@ class UpdatePeriodcallyConsumer(AsyncWebsocketConsumer):
         await asyncio.sleep(0.1)
       await asyncio.sleep(UPDATE_DELAY)
 
-  async def handle_disconnection_exception(self, tasks):
-    for task in tasks:
+  async def handle_disconnection_exception(self):
+    for task in self.tasks:
       task.cancel()
 
   async def main(self):
-    tasks = []
     send_persistent_list = asyncio.create_task(self.send_json_list())
 
-    tasks.extend([send_persistent_list])
-    await asyncio.gather(*tasks)
-    await self.handle_disconnection_exception(tasks) 
+    self.tasks.extend([send_persistent_list])
+    await asyncio.gather(*self.tasks)
+    await self.handle_disconnection_exception()
 
 
 # Auxiliary functions

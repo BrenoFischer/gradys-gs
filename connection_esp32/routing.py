@@ -5,6 +5,6 @@ from .consumers import ConnectionConsumer, ReceiveCommandConsumer, PostConsumer,
 ws_urlpatterns = [
   path('ws/connection/', ConnectionConsumer.as_asgi()),
   path('ws/receive/', ReceiveCommandConsumer.as_asgi()),
-  path('ws/update-drone/', PostConsumer.as_asgi()),
+  path('ws/update-info/', PostConsumer.as_asgi()),
   path('ws/update-periodically/', UpdatePeriodcallyConsumer.as_asgi())
 ]

@@ -1,6 +1,6 @@
 var observableSocket = new WebSocket('ws://localhost:8000/ws/connection/');
 var sendCommandSocket = new WebSocket('ws://localhost:8000/ws/receive/');
-var receivePostSocket = new WebSocket('ws://localhost:8000/ws/update-drone/');
+var receivePostSocket = new WebSocket('ws://localhost:8000/ws/update-info/');
 var updateSocket = new WebSocket('ws://localhost:8000/ws/update-periodically/');
 
 var activeDevicesId = []
