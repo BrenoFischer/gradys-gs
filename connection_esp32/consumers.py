@@ -56,12 +56,19 @@ class PostConsumer(AsyncWebsocketConsumer):
         response = await resp.json() 
         #print(f'ACK: {response}')
 
+  async def send_get_especific_device(self, url):
+    async with aiohttp.ClientSession() as session:
+      async with session.get(url) as resp:
+        response = await resp.json() 
+        return response
+
   async def send_via_post(self, text_data):
     config = configparser.ConfigParser()
     config.read('config.ini')
     received_json = json.loads(text_data)
 
     base_path = config['post']['base_path']
+    base_path_get = config['get']['base_get_path']
     device_id = str(received_json['receiver'])
 
     device_to_send = get_device_from_list_by_id(device_id)
@@ -81,7 +88,15 @@ class PostConsumer(AsyncWebsocketConsumer):
         if device_to_send['status'] != 'inactive':
           ip = device_to_send['ip']
           url = ip + device_id + '/' + base_path
-          await self.send_post_especific_device(url, received_json)
+          if received_json['type'] == 24: #GET request
+            url = ip + device_id + '/' + base_path_get
+            response_from_device = await self.send_get_especific_device(url)
+            print(f'Django recebeu resposta do GET request: {response_from_device}')
+            if self.logger_info != None:
+              self.logger_info.info(response_from_device)
+            await self.send(json.dumps(response_from_device))
+          else:  
+            await self.send_post_especific_device(url, received_json)
   
 
   async def receive(self, text_data):

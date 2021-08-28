@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from asgiref.sync import async_to_sync, sync_to_async
+from asgiref.sync import async_to_sync
 
 from .consumers import get_post_consumer_instance
 import configparser
@@ -73,5 +73,16 @@ def receive_command_test(request, device_id):
       ack['type'] = 29
     if type == 30:
       ack['type'] = 31
+
+  return JsonResponse(ack)
+
+
+@csrf_exempt
+def send_info(request, device_id):
+  # View temporária simulando um UAV como servidor web, que irá enviar um comando para GS
+  ack = {"id": 1, "type": -1, "seq": 0, "lat": 0, "log": 0, "high": 0, "DATA": "0"}
+  if request.method == 'GET':
+    print(f'O device com id: {device_id} está retornando informações.')
+    ack['id'] = device_id
 
   return JsonResponse(ack)
