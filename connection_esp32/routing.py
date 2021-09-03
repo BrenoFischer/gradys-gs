@@ -1,6 +1,7 @@
 from django.urls import path
-from .consumers import ConnectionConsumer, ReceiveCommandConsumer, PostConsumer, UpdatePeriodcallyConsumer
-
+from .post_consumers import  PostConsumer
+from .update_periodically_consumer import UpdatePeriodcallyConsumer
+from .serial_consumers import ConnectionConsumer, ReceiveCommandConsumer
 
 ws_urlpatterns = [
   path('ws/connection/', ConnectionConsumer.as_asgi()),

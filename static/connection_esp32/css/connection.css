@@ -131,10 +131,10 @@ html, body {
   gap: 8px;
 }
 
-#connected {
+#ip-connected {
   color: var(--green-color);
 }
 
-#disconnected {
+#ip-disconnected {
   color: var(--primary-color);
 }

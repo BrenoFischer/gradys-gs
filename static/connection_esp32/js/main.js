@@ -5,6 +5,7 @@ var updateSocket = new WebSocket('ws://localhost:8000/ws/update-periodically/');
 
 var activeDevicesId = []
 
+document.querySelector('#ip-connected').innerText = "IP: OK";
 
 function sendCommand(type) {
   jsonToSend = {id: 1, type: type, seq: 0, lat: -9, log: 10, high: 11, DATA: "0"}
@@ -99,14 +100,12 @@ function checkJsonType(msg) {
 
     switch(json_type) {
       case 13:  //Esperando conexão
-        //document.querySelector('#disconnected').innerText = "IP: OK | UART: OFF";
-        //document.querySelector('#connected').innerText = "";
-        document.querySelector('#connected').innerText = "IP: OK";
-        document.querySelector('#disconnected').innerText = "UART: OFF";
+      document.querySelector('#serial-connected').innerText = "";
+        document.querySelector('#serial-disconnected').innerText = "UART: OFF";
         break;
       case 14:  //Conectado
-        document.querySelector('#disconnected').innerText = "";
-        document.querySelector('#connected').innerText = "Conectado";
+        document.querySelector('#serial-disconnected').innerText = "";
+        document.querySelector('#serial-connected').innerText = "UART: ON";
         break;
       case 21:  //cmd-led-on-ACK
         notifyUiWhenJsonReceived(msg.data, msgUi);
@@ -184,6 +183,8 @@ sendCommandSocket.onclose = function(e) {
 };
 
 receivePostSocket.onclose = function(e) {
+  document.querySelector('#ip-connected').innerText = "";
+  document.querySelector('#ip-disconnected').innerText = "IP: OFF";
   console.error('Receive POST socket closed unexpectedly');
 }
 
