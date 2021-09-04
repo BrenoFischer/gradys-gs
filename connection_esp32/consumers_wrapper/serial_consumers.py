@@ -1,5 +1,5 @@
 import configparser
-from .serial_connector import SerialConnection
+from ..serial_connector import SerialConnection
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 

@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from asgiref.sync import async_to_sync
 
-from .post_consumers import get_post_consumer_instance
+from .consumers_wrapper.post_consumers import get_post_consumer_instance
 import configparser
 
 
