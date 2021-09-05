@@ -70,7 +70,7 @@ def get_device_from_list_by_id(id):
   return None
 
 
-def append_json_to_list(data):
+def append_json_to_persistant_list(data):
   drone_already_on_array = False
   for i,drone in enumerate(json_list_persistent):
     if drone['id'] == data['id']:
