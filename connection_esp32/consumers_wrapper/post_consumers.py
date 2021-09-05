@@ -4,7 +4,7 @@ import asyncio
 import json
 import configparser
 from datetime import date, datetime
-from .update_periodically_consumer import get_device_from_list_by_id, append_json_to_persistant_list
+from .update_periodically_consumer import get_device_from_list_by_id, append_device_to_persistant_list
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 
@@ -121,7 +121,7 @@ class PostConsumer(AsyncWebsocketConsumer):
     data['time'] = get_time_now().replace('"', '')
     data['status'] = 'active'
 
-    append_json_to_persistant_list(data)
+    append_device_to_persistant_list(data)
 
     if self.logger_info != None:
       self.logger_info.info(data)
