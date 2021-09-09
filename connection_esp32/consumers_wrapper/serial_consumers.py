@@ -29,7 +29,7 @@ class ConnectionConsumer(AsyncWebsocketConsumer):
 
 config = configparser.ConfigParser()
 config.read('config.ini')
-serial_available = config['serial_esp']['serial_available']
+serial_available = config['serial']['serial_available']
 
 async_serial = None
 if serial_available != "false":

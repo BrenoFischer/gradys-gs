@@ -9,13 +9,11 @@ import configparser
 
 
 def index(request):
-  return render(request, 'index.html', context={})
-
-def connection(request):
   context = {
     'google_maps_key': settings.GOOGLE_MAPS_API_KEY
   }
-  return render(request, 'connection.html', context=context)
+  return render(request, 'index.html', context=context)
+
 
 def create_new_dict(request_received):
   config = configparser.ConfigParser()
@@ -40,6 +38,7 @@ def create_new_dict(request_received):
     new_dict['ip'] = ip
   return new_dict
 
+
 @csrf_exempt 
 @async_to_sync
 async def post_to_socket(request):
@@ -56,6 +55,7 @@ async def post_to_socket(request):
       ack['type'] = 103
 
   return JsonResponse(ack)
+
 
 @csrf_exempt
 def receive_command_test(request, device_id):
@@ -78,7 +78,7 @@ def receive_command_test(request, device_id):
 
 
 @csrf_exempt
-def send_info(request, device_id):
+def send_info_from_get(request, device_id):
   # View temporária simulando um UAV como servidor web, que irá enviar um comando para GS
   ack = {"id": 1, "type": -1, "seq": 0, "lat": 0, "log": 0, "high": 0, "DATA": "0"}
   if request.method == 'GET':

@@ -66,8 +66,8 @@ class SerialConnection():
     self.logger_except = None
     self.handshake_json =  {"id": "3", "type": 13, "seq": 0, "ACK": 0, "SDATA": 0, "lat": -9, "lng": 10, "high": 11}
     self.connected_json = {"id": "3", "type": 14, "seq": 0, "ACK": 0, "SDATA": 0, "lat": -9, "lng": 10, "high": 11}
-    self.port = config['serial_esp']['port']
-    self.baudrate = int(config['serial_esp']['baudrate'])
+    self.port = config['serial']['port']
+    self.baudrate = int(config['serial']['baudrate'])
 
   def setup_logger(self, name, log_file, my_format, level=logging.INFO):
     """

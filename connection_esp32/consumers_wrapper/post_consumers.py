@@ -66,13 +66,13 @@ class PostConsumer(AsyncWebsocketConsumer):
     config.read('config.ini')
     received_json = json.loads(text_data)
 
-    base_path = config['post']['base_path']
+    base_path = config['post']['base_path_uav']
     base_path_get = config['get']['base_get_path']
     command_to_get = int(config['get']['command_type'])
     # --- End of pre-processing ---
 
-    # It'll search the persistent device list for available device with matching id,
-    # Or get all persistent list if device_id is 'all'
+    # It'll search the 'persistent device list' for available device, with matching id,
+    # Or get all persistent list if device_id is 'all'.
     device_id = str(received_json['receiver'])
     device_to_send = get_device_from_list_by_id(device_id)
 
@@ -173,6 +173,7 @@ def json_serializer(obj):
   if isinstance(obj, (datetime, date)):
     return obj.isoformat()
   raise TypeError ("Type %s not serializable" % type(obj))
-
+# End of Auxiliary functions
+# -------------------
 
 post_consumer_instance = None

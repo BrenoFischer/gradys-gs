@@ -54,7 +54,7 @@ Dentro do Django, a dinâmica de rotas é dada pela relação url/view. Uma view
 ![image info](./readme_images/url-patterns.png)
 
 <p>
-Com a url pattern acima, ao acessar, dentro do ambiente de desenvolvimento, a url http://localhost:8000/update-drone/, o callback do método post_to_socket (view) é disparado. É passado um http request para a view, que por sua ver precisa retornar uma response.
+Com a url pattern acima, ao acessar, dentro do ambiente de desenvolvimento, a url http://127.0.0.1:8000/update-info/, o callback do método post_to_socket (view) é disparado. É passado um http request para a view, que por sua ver precisa retornar uma response.
 </p>
 <p>
 Nesse projeto, é utilizada a rota mencionada acima para receber <b>requests POST</b>, com informações de devices. Queremos exibir tais informações em tela, e precisamos enviar do back-end (Django), para o front-end (HTML/Javascript). Essa conexão entre Django e Javascript é feita via <b>websocket</b>, com auxílio da biblioteca django-channels. O django-channels utiliza uma dinâmica parecida com a dinâmica url/view mencionada acima.

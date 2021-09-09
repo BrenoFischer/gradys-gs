@@ -1,13 +1,16 @@
+// Starting websocket connections
 var observableSocket = new WebSocket('ws://localhost:8000/ws/connection/');
 var sendCommandSocket = new WebSocket('ws://localhost:8000/ws/receive/');
 var receivePostSocket = new WebSocket('ws://localhost:8000/ws/update-info/');
 var updateSocket = new WebSocket('ws://localhost:8000/ws/update-periodically/');
 
+// List of active devices that'll show at 'select' field
 var activeDevicesId = []
 
 document.querySelector('#ip-connected').innerText = "IP: OK";
 
 function sendCommand(type) {
+  // Send the selected command to a set of devices, obtained from getDeviceReceive()
   jsonToSend = {id: 1, type: type, seq: 0, lat: -9, log: 10, high: 11, DATA: "0"}
   jsonToSend["receiver"] = getDeviceReceiver();
 
@@ -27,7 +30,7 @@ function sendCommand(type) {
 
 
 function getMatchingIndex(id) {
-  //Retorna a posição do id encontrado, no vetor de devices ou -1 caso não encontre
+  //Return the index of the matching ID, in the list of active devices OR return -1 if not found
   var matchingId = -1;
 
   [...document.getElementById('select-device').children].forEach((option, index) => {
@@ -39,6 +42,7 @@ function getMatchingIndex(id) {
 
 
 function getDeviceReceiver() {
+  // Return the device ID selected at 'select' field
   selectElement = document.getElementById('select-device');
   selectedDeviceId = selectElement.value;
 
@@ -46,6 +50,9 @@ function getDeviceReceiver() {
 }
 
 function verifyActiveDevices(id) {
+  // Search the list of active devices and
+  // return true if found matching ID
+  // return false if not found matching ID
   let match = false;
   activeDevicesId.forEach((deviceId) => {
     if(deviceId == id) match = true;
@@ -54,12 +61,14 @@ function verifyActiveDevices(id) {
 }
 
 function pushNewCommandOption(id, deviceType) {
+  // Insert in the 'select' field a new device option
   var selectElement = document.getElementById('select-device');
   var opt = new Option(`${deviceType.toUpperCase()} ${id}`, id);
   selectElement.add(opt);
 }
 
 function removeCommandOption(id) {
+  // Remove from the 'select' field a device with matching id
   var selectElement = document.getElementById('select-device');
   const matchingId = getMatchingIndex(id);
 
