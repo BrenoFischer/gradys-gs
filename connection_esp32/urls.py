@@ -18,6 +18,6 @@ base_path_get = config['get']['base_get_path']
 urlpatterns = [
     path('', index),
     path(path_receive_info, post_to_socket),
-    path('<int:device_id>/' + base_path, receive_command_test),
+    path('<int:command>/', receive_command_test),
     path('<int:device_id>/' + base_path_get, send_info_from_get),
 ]

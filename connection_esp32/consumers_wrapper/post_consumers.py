@@ -36,19 +36,20 @@ class PostConsumer(AsyncWebsocketConsumer):
     print(f'Post websocket disconnected {close_code}')
 
 
-  async def send_post_especific_device(self, url, json_to_send):
+  async def send_post_specific_device(self, url, json_to_send):
     # Send POST request to specific URL (representing a specific device)
     async with aiohttp.ClientSession() as session:
       # --- (Temporary test) Delay to test parallel tasks (device id 5 wait 5s to send) ---
-      device_id = url.split('/')[3]
+      device_id = json_to_send['id']
       if device_id == '5':
         await asyncio.sleep(5)
       # --- (End of temporary test) ---
+      print(f'Enviando: {json_to_send}')
       async with session.post(url, data=json_to_send) as resp:
         response = await resp.json() 
 
 
-  async def send_get_especific_device(self, url):
+  async def send_get_specific_device(self, url):
     # Send GET request to specific URL (representing a specific device), wait for response and send to JS via socket
     async with aiohttp.ClientSession() as session:
       async with session.get(url) as resp:
@@ -61,51 +62,29 @@ class PostConsumer(AsyncWebsocketConsumer):
 
   async def send_via_http(self, text_data):
     # The command received via socket will be processed 
-    # --- Pre-process to get .ini info ---
-    config = configparser.ConfigParser()
-    config.read('config.ini')
     received_json = json.loads(text_data)
 
-    base_path = config['post']['base_path_uav']
-    base_path_get = config['get']['base_get_path']
-    command_to_get = int(config['get']['command_type'])
-    # --- End of pre-processing ---
-
     # It'll search the 'persistent device list' for available device, with matching id,
-    # Or get all persistent list if device_id is 'all'.
-    device_id = str(received_json['receiver'])
-    device_to_send = get_device_from_list_by_id(device_id)
+    # Or get all persistent list if device_receiver_id is 'all'.
+    device_receiver_id = str(received_json['receiver'])
+    device_to_send_list = get_device_from_list_by_id(device_receiver_id)
 
-    if device_to_send is None:
-      print('There is no available device to send.')
-    else:
-      if device_id == 'all':
-        for device in device_to_send:
-          if device['status'] != 'inactive':
-            ip = device['ip']
-            id = str(device['id'])
-            url = ip + id + '/' + base_path
-            if received_json['type'] == command_to_get:
-              # The command it's a GET request and will have the 'view' GET base_path
-              url = ip + id + '/' + base_path_get
-              task = asyncio.create_task(self.send_get_especific_device(url))
-            else:
-              # POST request
-              task = asyncio.create_task(self.send_post_especific_device(url, received_json))
-            self.async_tasks.append(task)
-      else: # Request for specific device id
-        if device_to_send['status'] != 'inactive':
-          ip = device_to_send['ip']
-          url = ip + device_id + '/' + base_path
+    for device in device_to_send_list:
+      ip = device['ip']
+      id = str(device['id'])
+      url = ip + str(received_json['type']) + '/'
+      # Json_to_send will have the correct ID in the 'id' field
+      json_to_send = replicate_dict_new_id(id, received_json)
 
-          if received_json['type'] == command_to_get:
-            # GET request
-            url = ip + device_id + '/' + base_path_get
-            await self.send_get_especific_device(url)
-          else:
-            # POST request
-            await self.send_post_especific_device(url, received_json)
-  
+      if received_json['type'] == command_to_get:
+        # The command is a GET request and will have the 'view' GET base_path
+        url = ip + id + '/' + base_path_get
+        task = asyncio.create_task(self.send_get_specific_device(url))
+      else:
+        # POST request
+        task = asyncio.create_task(self.send_post_specific_device(url, json_to_send))
+      self.async_tasks.append(task)
+
 
   async def receive(self, text_data):
     # Receive msg (text_data) from socket and call 'send_via_http' method to handle it 
@@ -173,7 +152,27 @@ def json_serializer(obj):
   if isinstance(obj, (datetime, date)):
     return obj.isoformat()
   raise TypeError ("Type %s not serializable" % type(obj))
+
+
+def replicate_dict_new_id(id, json_to_send):
+  # Create a new dict changing it's 'ID' key
+  new_dict = {}
+  for key, item in json_to_send.items():
+    if key == 'id':
+      new_dict[key] = id
+    else:
+      new_dict[key] = item
+  return new_dict
 # End of Auxiliary functions
 # -------------------
+
+
+# --- Pre-process to get .ini info ---
+config = configparser.ConfigParser()
+config.read('config.ini')
+
+base_path_get = config['get']['base_get_path']
+command_to_get = int(config['get']['command_type'])
+# --- End of pre-processing ---
 
 post_consumer_instance = None

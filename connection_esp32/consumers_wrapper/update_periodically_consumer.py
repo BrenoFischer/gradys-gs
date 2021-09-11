@@ -72,16 +72,16 @@ def insert_activity_flag(time_now, time_to_inactive, time_to_on_hold):
 
 
 def get_device_from_list_by_id(id):
-  # Return json of the device with the id received as param.
+  # Return list of single json of the device with the id received as param.
   # If the id is 'all' return the whole list.
-  # Return None if not found.
+  # Return empty list if not found.
   if id == 'all':
     return device_list_persistent
 
   for device in device_list_persistent:
     if str(device['id']) == id:
-      return device
-  return None
+      return [device]
+  return []
 
 
 def append_device_to_persistant_list(data):
