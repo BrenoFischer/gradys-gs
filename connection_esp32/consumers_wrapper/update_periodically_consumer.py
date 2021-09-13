@@ -103,7 +103,7 @@ def append_device_to_persistant_list(data):
 # --- Reading the delay to send the info to JS ---
 config = configparser.ConfigParser()
 config.read('config.ini')
-UPDATE_DELAY = float(config['list_updater']['update_delay'])
+UPDATE_DELAY = float(config['list-updater']['update_delay'])
 # --- End of read ---
 
 device_list_persistent = []
