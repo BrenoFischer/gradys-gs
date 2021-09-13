@@ -38,8 +38,8 @@ class UpdatePeriodcallyConsumer(AsyncWebsocketConsumer):
 
     while True:
       time_now = datetime.now()
-      seconds_to_be_inactive = int(config['consumers']['seconds_to_device_be_inactive'])
-      seconds_to_be_on_hold = int(config['consumers']['seconds_to_device_be_on_hold'])
+      seconds_to_be_inactive = int(config['list-updater']['seconds_to_device_be_inactive'])
+      seconds_to_be_on_hold = int(config['list-updater']['seconds_to_device_be_on_hold'])
 
       for device_update in device_list_persistent:
         time_shifted_inactive = datetime.strptime(device_update['time'], date_format) + timedelta(seconds = seconds_to_be_inactive)
@@ -103,7 +103,7 @@ def append_device_to_persistant_list(data):
 # --- Reading the delay to send the info to JS ---
 config = configparser.ConfigParser()
 config.read('config.ini')
-UPDATE_DELAY = float(config['consumers']['update_delay'])
+UPDATE_DELAY = float(config['list_updater']['update_delay'])
 # --- End of read ---
 
 device_list_persistent = []
