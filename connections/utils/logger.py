@@ -4,7 +4,7 @@ from datetime import datetime
 class Logger():
   def __init__(self):
     time_now = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-    path = "./connection_esp32/LOGS/"
+    path = "./connections/LOGS/"
 
     log_file_name_exc = path + f'exceptions/post-{time_now}.log'
     self.logger_except = self.setup_logger('log_exception', log_file_name_exc, '%(lineno)d: %(asctime)s %(message)s', level=logging.ERROR)

@@ -14,7 +14,7 @@ from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 
-from connection_esp32.routing import ws_urlpatterns
+from connections.routing import ws_urlpatterns
 
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')

@@ -31,9 +31,9 @@ class GoogleMaps {
   getMarkerImage(id, status, deviceType) {
     const markerColor = this.getMarkerColor(status);
     return deviceType == 'uav' ? 
-      `../static/connection_esp32/images/premadeIcons/marker_${markerColor}${id}.png`
+      `../static/connections/images/premadeIcons/marker_${markerColor}${id}.png`
     :
-      `../static/connection_esp32/images/premadeIcons/marker_black${id}.png`;
+      `../static/connections/images/premadeIcons/marker_black${id}.png`;
   }
 
   newMarker(id, lat, log, status, deviceType) {
