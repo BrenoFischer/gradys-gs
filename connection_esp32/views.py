@@ -80,7 +80,7 @@ def receive_command_test(request, command):
 @csrf_exempt
 def send_info_from_get(request, device_id):
   # View temporária simulando um UAV como servidor web, que irá enviar um comando para GS
-  ack = {"id": 1, "type": -1, "seq": 0, "lat": 0, "log": 0, "high": 0, "DATA": "0"}
+  ack = {"id": 1, "type": -1, "seq": 0, "lat": 0, "log": 0, "high": 0, "DATA": "0", "device": "uav"}
   if request.method == 'GET':
     print(f'O device com id: {device_id} está retornando informações.')
     ack['id'] = device_id

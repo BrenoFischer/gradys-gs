@@ -7,6 +7,8 @@ from datetime import date, datetime
 from .update_periodically_consumer import get_device_from_list_by_id, append_device_to_persistant_list
 from channels.generic.websocket import AsyncWebsocketConsumer
 
+from ..utils.logger import Logger
+
 
 class PostConsumer(AsyncWebsocketConsumer):
   # Websocket consumer that handles POST requests received.
@@ -15,8 +17,6 @@ class PostConsumer(AsyncWebsocketConsumer):
 
   def __init__(self) -> None:
       super().__init__()
-      self.logger_except = None
-      self.logger_info = None
       self.async_tasks = []
 
 
@@ -24,7 +24,6 @@ class PostConsumer(AsyncWebsocketConsumer):
     # Called when websocket connection is required (when corresponding url is accessed).
     global post_consumer_instance
     await self.accept()
-    self.initiate_loggers()
     # Instantiate itself, so 'post_to_socket' view can access this class method.
     post_consumer_instance = self
 
@@ -55,8 +54,8 @@ class PostConsumer(AsyncWebsocketConsumer):
       async with session.get(url) as resp:
         response_from_device = await resp.json() 
         print(f'Django recebeu resposta do GET request: {response_from_device}')
-        if self.logger_info != None:
-          self.logger_info.info(response_from_device)
+
+        logger.log_info(source=response_from_device['device'], data=response_from_device)
         await self.send(json.dumps(response_from_device))
 
 
@@ -88,8 +87,7 @@ class PostConsumer(AsyncWebsocketConsumer):
 
   async def receive(self, text_data):
     # Receive msg (text_data) from socket and call 'send_via_http' method to handle it 
-    if self.logger_info != None:
-      self.logger_info.info(text_data)
+    logger.log_info(source="GS", data=text_data)
     
     await self.send_via_http(text_data)
 
@@ -102,38 +100,12 @@ class PostConsumer(AsyncWebsocketConsumer):
 
     append_device_to_persistant_list(data)
 
-    if self.logger_info != None:
-      self.logger_info.info(data)
+    logger.log_info(source=data['device'], data=data)
     try:
       await self.send(json.dumps(data)) # Send to JS via socket
     except Exception:
-      if self.logger_except != None:
-        self.logger_except.exception('')
+      logger.log_except()
 
-
-  # --- Logging functions ---
-  def setup_logger(self, name, log_file, my_format, level=logging.INFO):
-    formatter = logging.Formatter(my_format)
-    handler = logging.FileHandler(log_file)
-    handler.setFormatter(formatter)
-
-    lo = logging.getLogger(name)
-    lo.setLevel(level)
-    lo.addHandler(handler)
-
-    return lo
-
-
-  def initiate_loggers(self):
-    time_now = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-    path = "./connection_esp32/LOGS/"
-
-    log_file_name_exc = path + f'exceptions/post-{time_now}.log'
-    self.logger_except = self.setup_logger('log_exception', log_file_name_exc, '%(lineno)d: %(asctime)s %(message)s', level=logging.ERROR)
-
-    log_file_name_info = path + f'info/post-{time_now}.log'
-    self.logger_info = self.setup_logger('log_info', log_file_name_info, '%(asctime)s %(message)s', level=logging.INFO)
-  # --- End of Logging functions ---
 
 
 # Auxiliary functions
@@ -176,3 +148,4 @@ command_to_get = int(config['get']['command_type'])
 # --- End of pre-processing ---
 
 post_consumer_instance = None
+logger = Logger()
