@@ -42,6 +42,7 @@ def create_new_dict(request_received):
 @csrf_exempt 
 @async_to_sync
 async def post_to_socket(request):
+  # Receives a POST request with information on it's body
   # Start ACK with an error code on type (101?).
   # If the post is sent to the consumer, the type is 103.
   ack = {"id": 1, "type": 101, "seq": 0, "lat": 0, "log": 0, "high": 0, "DATA": "0"}

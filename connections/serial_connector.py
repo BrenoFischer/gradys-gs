@@ -144,7 +144,7 @@ class SerialConnection():
 
 
   async def consume(self, websocket):
-    from .consumers import get_json_list_persistent, append_json_to_list, get_time
+    from .consumers_wrapper.update_periodically_consumer import get_json_list_persistent, append_json_to_list, get_time
 
     while True:
       json_consumed = await self.queue.get()
