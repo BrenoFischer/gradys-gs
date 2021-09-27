@@ -135,7 +135,7 @@ var socket = new WebSocket('ws://localhost:8000/ws/connection/');
 When this command is read, the ConnectionConsumer is called and a connection is initated.
 Our Consumers are inside ***connections/consumers_wrappers/*** and a new one can be created, inheriting WebsocketConsumer or AsyncWebsocketConsumer, depending on it's functionality. You can substitute three main methods:
 <!--ts-->
-* **connect**: called when the specific url is accessed and start a dedicated connection with self.accept.
+* **connect**: called when the specific url is accessed and start a dedicated connection with self.accept. This is the only method you NEED to override.
 * **receive**: called when a message is sent via socket connection.
 * **disconnect**: called when the connection is closed.
 <!--te-->
