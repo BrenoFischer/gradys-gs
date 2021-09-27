@@ -11,24 +11,28 @@ class UpdatePeriodcallyConsumer(AsyncWebsocketConsumer):
   # The interval of time that the list will be sent to JS via socket, is set in the config.ini file.
   def __init__(self) -> None:
     super().__init__()
-    self.tasks = []
+    self.task = None
 
 
   async def connect(self):
-    # When the socket connection is stablished, it'll run the looping task to send the list, called in the 'main()'.
+    # When the socket connection is stablished, it'll run the looping task to send the list.
     await self.accept()
-    await self.main()
 
-
-  async def disconnect(self, close_code):
-    await self.handle_disconnection_exception()
-    print(f'Update periodically websocket disconnected {close_code}')
+    send_persistent_list = asyncio.create_task(self.send_device_list())
+    self.task = send_persistent_list
 
 
   async def handle_disconnection_exception(self):
-    for task in self.tasks:
-      task.cancel()
+    # When the websocket connection is closed, it will cancel the running task.
+    if self.task is not None:
+      self.task.cancel()
 
+
+  async def disconnect(self, close_code):
+    # Called when websocket connection is closed.
+    await self.handle_disconnection_exception()
+    print(f'UPDATE websocket disconnected {close_code}')
+    
 
   async def send_device_list(self):
     # The task will send to JS every UPDATE_DELAY seconds the persistent list of devices info received.
@@ -48,15 +52,6 @@ class UpdatePeriodcallyConsumer(AsyncWebsocketConsumer):
         await self.send(json.dumps(device_update))
         await asyncio.sleep(0.1)
       await asyncio.sleep(UPDATE_DELAY)
-
-
-  async def main(self):
-    # It'll create the looping task and wait for it to finish (only finishable when connection is closed)
-    send_persistent_list = asyncio.create_task(self.send_device_list())
-
-    self.tasks.extend([send_persistent_list])
-    await asyncio.gather(*self.tasks)
-    await self.handle_disconnection_exception()
 
 
 # --- Auxiliary functions ---
