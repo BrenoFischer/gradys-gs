@@ -1,0 +1,23 @@
+<!doctype html>
+<title>Return from Flask</title>
+<center>
+{% if name %}
+  <h1>Return: {{ name }}!</h1>
+{% else %}
+  <h1>Empty parameter</h1>
+{% endif %}
+<br>
+<br>
+
+<a href="/">Home</a><br><br>
+<a href="/connect">Connect vehicle</a><br><br>
+<a href="/arm">Arm vehicle</a><br><br>
+<a href="/follow">Follow</a><br><br>
+<a href="/takeoff">Takeoff default altitute</a><br><br>
+<a href="/takeoff/15">Takeoff 15m</a><br><br>
+<a href="/auto">Play a full auto mission</a><br><br>
+<a href="/rtl">RTL</a><br><br>
+<a href="/position">Vehicle position</a><br><br>
+<a href="/position_json">Vehicle JSON' position</a><br><br>
+
+<center>
