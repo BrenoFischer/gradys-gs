@@ -49,7 +49,14 @@ If you need more information about virtual environments with python, it [can be 
 ## Installing necessary packages
 The list of necessary packages are inside requeriments.txt file. It'll be installed automatically, using the Python package manager, pip. You can install, running on Windows console:
 ```console
+Windows
 C:\path-to-this-cloned-repository\> pip install -r requeriments.txt
+```
+
+On Linux, you should run the compatible script file, requeriments_linux.txt:
+```console
+Linux
+gradys-gs$ pip install -r requeriments_linux.txt
 ```
 
 
