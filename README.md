@@ -20,14 +20,28 @@ If not installed or need to updgrade, you can get more information [here](https:
 With Python3 installed, you should be able to clone this repository. [More information on how to clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository).
 
 ## Creating a virtual environment
-In order to keep this framework in a separate environment, with it's own packages and versions, it's recommended to create a virtual environment. 
-On Windows, you can create with the command:
+In order to keep this framework in a separate environment, with it's own packages and versions, it's recommended to create a virtual environment. On Windows:
 ```console
+Windows
 C:\> python -m venv C:\path-to-this-cloned-repository/venv
 ```
+On Linux, you can check if virtualenv is already installed, install it, if not already installed, and create the venv:
+```console
+Linux
+gradys-gs$ virtualenv --version
+  virtualenv xx.x.x
+gradys-gs$ sudo pip3 install virtualenv
+gradys-gs$ virtualenv venv
+```
+
 This will create a folder called *venv*, inside the project's folder. Now you have to activate the environment to install/use packages only from this venv.
 ```console
+Windows
 C:\> C:\path-to-this-cloned-repository\venv\Scripts\activate
+```
+```console
+Linux
+gradys-gs$ source venv/bin/activate
 ```
 
 If you need more information about virtual environments with python, it [can be found here](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment).
