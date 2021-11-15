@@ -64,8 +64,8 @@ class SerialConnection():
     self.queue = None
     self.logger_info = None
     self.logger_except = None
-    self.handshake_json =  {"id": "3", "type": 13, "seq": 0, "ACK": 0, "SDATA": 0, "lat": -9, "lng": 10, "high": 11}
-    self.connected_json = {"id": "3", "type": 14, "seq": 0, "ACK": 0, "SDATA": 0, "lat": -9, "lng": 10, "high": 11}
+    self.handshake_json =  {"id": "3", "type": 13}
+    self.connected_json = {"id": "3", "type": 14}
     self.port = config['serial']['port']
     self.baudrate = int(config['serial']['baudrate'])
 

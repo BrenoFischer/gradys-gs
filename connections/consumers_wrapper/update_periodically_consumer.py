@@ -56,7 +56,7 @@ class UpdatePeriodcallyConsumer(AsyncWebsocketConsumer):
 
 # --- Auxiliary functions ---
 def insert_activity_flag(time_now, time_to_inactive, time_to_on_hold):
-  # The flag will be base on:
+  # The flag will be based on:
   # Time now >= time msg arrived + amount of time to be considered inactive?
   # Time now >= time msg arrived + amount of time to be considered on hold?
   if time_now >= time_to_inactive:

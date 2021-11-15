@@ -62,6 +62,7 @@ import datetime
 import configparser
 import threading
 import atexit
+import requests
 
 
 # Json stuff
@@ -1692,11 +1693,18 @@ def create_app():
         with dataLock:
             #sample print('Safe print regardless race condition...')
             global copter
+            config = configparser.ConfigParser()
+            config.read('../config.ini')
+            path_to_post = config['post']['ip'] + config['post']['path_receive_info']
             targetpos = copter.mav.location(relative_alt=True)
-            json_tmp = '{"id": 21,"lat": ' + str(targetpos.lat) + ',"lng": ' + str(targetpos.lng) + ',"alt":' + str(targetpos.alt) + '}'
-            #print('UAV is on: ' + json_tmp)
-            #TO-DO: Breno: insert the POST/GET to ground here... you need to create the json as you wish/need in GS
-            # pass
+            json_tmp = {"id": 21, "lat": str(targetpos.lat), "lng": str(targetpos.lng), "alt": str(targetpos.alt)}
+            json_tmp['ip'] = config['uav-simulator']['uav_url']
+            json_tmp['device'] = 'uav'
+            json_tmp['type'] = 102
+            json_tmp['seq'] = 0
+
+            r = requests.post(path_to_post, data=json_tmp)
+            print(r.status_code, r.reason)
             # Do your stuff with commonDataStruct Here
 
         # Set the next thread to happen

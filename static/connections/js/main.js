@@ -11,7 +11,13 @@ document.querySelector('#ip-connected').innerText = "IP: OK";
 
 function sendCommand(type) {
   // Send the selected command to a set of devices, obtained from getDeviceReceive()
-  jsonToSend = {id: 1, type: type, seq: 0, lat: -9, log: 10, high: 11, DATA: "0"}
+  //
+  // Format of command-json that will be sent:
+  // id - (int) id of the groundstation
+  // type - (int) integer that represent what this command will do (see table of commands)
+  // receiver - (int) ID of the active device on the 'select-device list'
+
+  jsonToSend = {id: 1, type: type, seq: 0, lat: -9, lng: 10, alt: 11, DATA: "0"}
   jsonToSend["receiver"] = getDeviceReceiver();
 
   jsonToSend = JSON.stringify(jsonToSend);
@@ -103,18 +109,18 @@ function checkJsonType(msg) {
     console.log(djangoData);
     json_type = djangoData['type'];
 
-    msgUi = "ACK: ";
-    msgDefault = "JSON unknown: ";
-    msgDrone = "UAV info: ";
+    msgUi = 'ACK: ';
+    msgDefault = 'JSON unknown: ';
+    msgDrone = 'UAV info: ';
 
     switch(json_type) {
       case 13:  //Esperando conexão
       document.querySelector('#serial-connected').innerText = "";
-        document.querySelector('#serial-disconnected').innerText = "UART: OFF";
+        document.querySelector('#serial-disconnected').innerText = 'UART: OFF';
         break;
       case 14:  //Conectado
         document.querySelector('#serial-disconnected').innerText = "";
-        document.querySelector('#serial-connected').innerText = "UART: ON";
+        document.querySelector('#serial-connected').innerText = 'UART: ON';
         break;
       case 21:  //cmd-led-on-ACK
         notifyUiWhenJsonReceived(msg.data, msgUi);
@@ -135,29 +141,28 @@ function checkJsonType(msg) {
         notifyUiWhenJsonReceived(msg.data, msgUi);
         break;
       case 102: //Informação do device recebido
-        const id = djangoData['id'];
-        const ip = djangoData['ip'];
-        const lat = parseFloat(djangoData['lat']);
-        const log = parseFloat(djangoData['log']);
-        const status = djangoData['status'];
-        const deviceType = djangoData['device'];
+        var id = djangoData['id'];
+        var lat = parseFloat(djangoData['lat']);
+        var lng = parseFloat(djangoData['lng']);
+        var status = djangoData.hasOwnProperty('status') ? djangoData['status'] : 'active';
+        var deviceType = djangoData.hasOwnProperty('device') ? djangoData['device'] : 'uav';
 
         //Adiciona novo device nas opções de comando
         if(!verifyActiveDevices(id)){
-          if(status != "inactive") {
+          if(status != 'inactive') {
             activeDevicesId.push(id);
             pushNewCommandOption(id, deviceType);
           }
         }
         else {
           //Retira device se está nas opções e está inativo
-          if(status == "inactive") {
+          if(status == 'inactive') {
             removeCommandOption(id);
           }
         }
 
         notifyUiWhenJsonReceived(msg.data, msgDrone);
-        gmap.newMarker(id, lat, log, status, deviceType);
+        gmap.newMarker(id, lat, lng, status, deviceType);
         break;
       default:
         notifyUiWhenJsonReceived(msg.data, msgDefault);
@@ -193,7 +198,7 @@ sendCommandSocket.onclose = function(e) {
 
 receivePostSocket.onclose = function(e) {
   document.querySelector('#ip-connected').innerText = "";
-  document.querySelector('#ip-disconnected').innerText = "IP: OFF";
+  document.querySelector('#ip-disconnected').innerText = 'IP: OFF';
   console.error('Receive POST socket closed unexpectedly');
 }
 
@@ -204,26 +209,38 @@ updateSocket.onclose = function(e) {
 
 // Onclick functions
 //-------------------
-document.querySelector('#turn-on').onclick = function(e) {
+// Table of commands:
+// 20: /path_position_absolute
+// 22: /path_position_relative
+// 24: /auto
+// 26: /run_experiment
+// 28: /set_auto
+// 30: /set_rtl
+// 32: /takeoff_and_hold
+document.querySelector('#position-absolute').onclick = function(e) {
   sendCommand(20);
 };
 
-document.querySelector('#turn-off').onclick = function(e) {
+document.querySelector('#position-relative').onclick = function(e) {
   sendCommand(22);
 };
 
-document.querySelector('#forward-1').onclick = function(e) {
+document.querySelector('#auto').onclick = function(e) {
   sendCommand(24);
 };
 
-document.querySelector('#forward-2').onclick = function(e) {
+document.querySelector('#run-experiment').onclick = function(e) {
   sendCommand(26);
 };
 
-document.querySelector('#initiate-flight').onclick = function(e) {
+document.querySelector('#set-auto').onclick = function(e) {
   sendCommand(28);
 };
 
-document.querySelector('#interrupt-flight').onclick = function(e) {
+document.querySelector('#abort-all').onclick = function(e) {
   sendCommand(30);
+};
+
+document.querySelector('#takeoff-and-hold').onclick = function(e) {
+  sendCommand(32);
 };

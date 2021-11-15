@@ -36,13 +36,13 @@ class GoogleMaps {
       `../static/connections/images/premadeIcons/marker_black${id}.png`;
   }
 
-  newMarker(id, lat, log, status, deviceType) {
+  newMarker(id, lat, lng, status, deviceType) {
     let foundedMarkerIndex = this.findMarkerIdIndex(id);
 
     if(foundedMarkerIndex == -1) {
       const image = this.getMarkerImage(id, status, deviceType);
 
-      let myLatLng = new google.maps.LatLng(lat,log);
+      let myLatLng = new google.maps.LatLng(lat,lng);
       let marker = new google.maps.Marker({
         position: myLatLng,
         title: "Drone " + id,
@@ -57,7 +57,7 @@ class GoogleMaps {
       marker.setMap(this.map);
     }
     else {
-      const myLatLng = new google.maps.LatLng(lat,log);
+      const myLatLng = new google.maps.LatLng(lat,lng);
       const image = this.getMarkerImage(id, status, deviceType);
 
       //can change .setVisible(false) if wanna hide

@@ -37,11 +37,6 @@ class PostConsumer(AsyncWebsocketConsumer):
   async def send_post_specific_device(self, url, json_to_send):
     # Send POST request to specific URL (representing a specific device)
     async with aiohttp.ClientSession() as session:
-      # --- (Temporary test) Delay to test parallel tasks (device id 5 wait 5s to send) ---
-      device_id = json_to_send['id']
-      if device_id == '5':
-        await asyncio.sleep(5)
-      # --- (End of temporary test) ---
       print(f'Enviando: {json_to_send}')
       async with session.post(url, data=json_to_send) as resp:
         response = await resp.json() 
@@ -51,7 +46,7 @@ class PostConsumer(AsyncWebsocketConsumer):
     # Send GET request to specific URL (representing a specific device), wait for response and send to JS via socket
     async with aiohttp.ClientSession() as session:
       async with session.get(url) as resp:
-        response_from_device = await resp.json() 
+        response_from_device = await resp.json(content_type=None)
         print(f'Django recebeu resposta do GET request: {response_from_device}')
 
         logger.log_info(source=response_from_device['device'], data=response_from_device)
@@ -70,13 +65,16 @@ class PostConsumer(AsyncWebsocketConsumer):
     for device in device_to_send_list:
       ip = device['ip']
       id = str(device['id'])
-      url = ip + str(received_json['type']) + '/'
+      command = str(received_json['type'])
+      print(f'Type recebido: {command}')
+      command_path_list = config['commands-list'][command].split(',')
+      endpoint = command_path_list[0]
+      url = ip + endpoint
       # Json_to_send will have the correct ID in the 'id' field
       json_to_send = replicate_dict_new_id(id, received_json)
 
-      if received_json['type'] == command_to_get:
-        # The command is a GET request and will have the 'view' GET base_path
-        url = ip + id + '/' + base_path_get
+      if command_path_list[1] == 'get':
+        #GET request
         task = asyncio.create_task(self.send_get_specific_device(url))
       else:
         # POST request
@@ -141,9 +139,6 @@ def replicate_dict_new_id(id, json_to_send):
 # --- Pre-process to get .ini info ---
 config = configparser.ConfigParser()
 config.read('config.ini')
-
-base_path_get = config['get']['base_get_path']
-command_to_get = int(config['get']['command_type'])
 # --- End of pre-processing ---
 
 post_consumer_instance = None
