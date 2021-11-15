@@ -6,3 +6,9 @@ connections/LOGS/exceptions/*
 connections/LOGS/info/*
 !connections/LOGS/exceptions/.gitkeep
 !connections/LOGS/info/.gitkeep
+uav_simulator/*.bin
+uav_simulator/*.parm
+uav_simulator/*.tlog
+uav_simulator/*.raw
+uav_simulator/logs/*
+uav_simulator/terrain/*
