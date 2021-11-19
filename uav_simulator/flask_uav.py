@@ -96,6 +96,12 @@ parser.add_argument(
     default=-1,
     help="Value for uav UAV on localhost",  
 )
+parser.add_argument(
+    '--uav_ip',
+    dest='uav_ip',
+    default='0.0.0.0',
+    help="IP to run the flask server",  
+)
 
 args = parser.parse_args()
 
@@ -1535,7 +1541,7 @@ Also, ignores heartbeats not from our target system"""
 #----------------------------------------------------------------------
 # Threading for flask 
 #
-POOL_TIME = 2 #Seconds
+POOL_TIME = 1 #Seconds
 
 # variables that are accessible from anywhere
 commonDataStruct = {}
@@ -1656,7 +1662,7 @@ def create_app():
     def flask_position():
         global copter
         targetpos = copter.mav.location(relative_alt=True)
-        json_tmp = '{"id": 21, "lat":' + str(targetpos.lat) + ', "lng": ' + str(targetpos.lng) + ', "high": ' + str(targetpos.alt) + '}'
+        json_tmp = '{"id": ' + str(args.uav_sysid) + ', "lat":' + str(targetpos.lat) + ', "lng": ' + str(targetpos.lng) + ', "high": ' + str(targetpos.alt) + '}'
         return render_template('return.html', name=json_tmp)    
 
 
@@ -1664,11 +1670,12 @@ def create_app():
     def flask_position_json():
         global copter
         targetpos = copter.mav.location(relative_alt=True)
-        json_tmp = '{"id": 21,"lat": ' + str(targetpos.lat) + ',"lng": ' + str(targetpos.lng) + ',"alt":' + str(targetpos.alt) + '}'
+        json_tmp = '{"id": ' + str(args.uav_sysid) + ',"lat": ' + str(targetpos.lat) + ',"lng": ' + str(targetpos.lng) + ',"alt":' + str(targetpos.alt) + '}'
         #return json.dumps(json_tmp)
         #print(json_tmp)
         #print(json
         return json_tmp
+
 
     @app.route('/position_absolute_json')
     def flask_position_relative_json():
@@ -1693,15 +1700,18 @@ def create_app():
         with dataLock:
             #sample print('Safe print regardless race condition...')
             global copter
-            config = configparser.ConfigParser()
-            config.read('../config.ini')
-            path_to_post = config['post']['ip'] + config['post']['path_receive_info']
+            config_from_django = configparser.ConfigParser()
+            config_from_django.read('../config.ini')
+            path_to_post = config_from_django['post']['ip'] + config_from_django['post']['path_receive_info']
             targetpos = copter.mav.location(relative_alt=True)
-            json_tmp = {"id": 21, "lat": str(targetpos.lat), "lng": str(targetpos.lng), "alt": str(targetpos.alt)}
-            json_tmp['ip'] = config['uav-simulator']['uav_url']
+            json_tmp = {"id": int(args.uav_sysid), "lat": str(targetpos.lat), "lng": str(targetpos.lng), "alt": str(targetpos.alt)}
             json_tmp['device'] = 'uav'
             json_tmp['type'] = 102
             json_tmp['seq'] = 0
+            if (str(args.uav_ip)):
+                json_tmp['ip'] = str(args.uav_ip) + ':' + flask_port + '/'
+            else:
+                json_tmp['ip'] = config_from_django['uav-simulator']['uav_url'] + ':' + flask_port + '/'
 
             r = requests.post(path_to_post, data=json_tmp)
             print(r.status_code, r.reason)
