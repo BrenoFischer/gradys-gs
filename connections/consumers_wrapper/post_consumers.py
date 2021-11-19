@@ -17,6 +17,7 @@ class PostConsumer(AsyncWebsocketConsumer):
   def __init__(self) -> None:
       super().__init__()
       self.async_tasks = []
+      self.abort_all_task = None
 
 
   async def connect(self):
@@ -31,6 +32,8 @@ class PostConsumer(AsyncWebsocketConsumer):
     # Called when websocket connection is closed.
     for task in self.async_tasks:
       task.cancel()
+    if self.abort_all_task:
+      self.abort_all_task.cancel()
     print(f'Post websocket disconnected {close_code}')
 
 
@@ -53,6 +56,23 @@ class PostConsumer(AsyncWebsocketConsumer):
         await self.send(json.dumps(response_from_device))
 
 
+  async def keep_abort_all(self, command):
+    SECONDS_TO_WAIT = 4
+    # Keep sending /rtl to all devices, to abort all
+    device_to_send_list = get_device_from_list_by_id('all')
+    while True:
+      for device in device_to_send_list:
+        ip = device['ip']
+        print(ip)
+        command_path_list = config['commands-list'][str(command)].split(',')
+        print(command_path_list)
+        endpoint = command_path_list[0]
+        url = ip + endpoint
+        task = asyncio.create_task(self.send_get_specific_device(url))
+        self.async_tasks.append(task)
+      await asyncio.sleep(SECONDS_TO_WAIT)
+
+
   async def send_via_http(self, text_data):
     # The command received via socket will be processed 
     received_json = json.loads(text_data)
@@ -60,26 +80,35 @@ class PostConsumer(AsyncWebsocketConsumer):
     # It'll search the 'persistent device list' for available device, with matching id,
     # Or get all persistent list if device_receiver_id is 'all'.
     device_receiver_id = str(received_json['receiver'])
+    command = str(received_json['type'])
     device_to_send_list = get_device_from_list_by_id(device_receiver_id)
 
-    for device in device_to_send_list:
-      ip = device['ip']
-      id = str(device['id'])
-      command = str(received_json['type'])
-      print(f'Type recebido: {command}')
-      command_path_list = config['commands-list'][command].split(',')
-      endpoint = command_path_list[0]
-      url = ip + endpoint
-      # Json_to_send will have the correct ID in the 'id' field
-      json_to_send = replicate_dict_new_id(id, received_json)
+    if int(command) == 31:
+      # Checkbox is not checked anymore, abort all is canceled
+      if self.abort_all_task:
+        self.abort_all_task.cancel()
+    if int(command) == 30:
+      # Checkbox is checked, abort all is running. Creating a task to keep sending /rtl
+      self.abort_all_task = asyncio.create_task(self.keep_abort_all(30))
 
-      if command_path_list[1] == 'get':
-        #GET request
-        task = asyncio.create_task(self.send_get_specific_device(url))
-      else:
-        # POST request
-        task = asyncio.create_task(self.send_post_specific_device(url, json_to_send))
-      self.async_tasks.append(task)
+    if int(command) != 31 and int(command) != 30:
+      for device in device_to_send_list:
+        ip = device['ip']
+        id = str(device['id'])
+        print(f'Type recebido: {command}')
+        command_path_list = config['commands-list'][command].split(',')
+        endpoint = command_path_list[0]
+        url = ip + endpoint
+        # Json_to_send will have the correct ID in the 'id' field
+        json_to_send = replicate_dict_new_id(id, received_json)
+
+        if command_path_list[1] == 'get':
+          #GET request
+          task = asyncio.create_task(self.send_get_specific_device(url))
+        else:
+          # POST request
+          task = asyncio.create_task(self.send_post_specific_device(url, json_to_send))
+        self.async_tasks.append(task)
 
 
   async def receive(self, text_data):

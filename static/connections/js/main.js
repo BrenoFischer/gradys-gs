@@ -173,6 +173,15 @@ function checkJsonType(msg) {
   }
 }
 
+function checkAbort(checkbox) {
+  if(checkbox.checked) {
+    sendCommand(30);
+  }
+  else {
+    sendCommand(31);
+  }
+}
+
 receivePostSocket.onmessage = function(msg) {
   checkJsonType(msg);
 }
@@ -237,9 +246,9 @@ document.querySelector('#set-auto').onclick = function(e) {
   sendCommand(28);
 };
 
-document.querySelector('#abort-all').onclick = function(e) {
-  sendCommand(30);
-};
+// document.querySelector('#abort-all').onclick = function(e) {
+//   sendCommand(30);
+// };
 
 document.querySelector('#takeoff-and-hold').onclick = function(e) {
   sendCommand(32);

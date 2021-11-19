@@ -30,7 +30,10 @@
           <input class="button" id="auto" type="button" value="Start Auto">
           <input class="button" id="run-experiment" type="button" value="Run Experiment">
           <input class="button" id="set-auto" type="button" value="Set Auto">
-          <input class="button" id="abort-all" type="button" value="Abort All">
+          <div>
+            <input type="checkbox" name="abort-all-checkbox" onclick="checkAbort(this)" />
+            <span>Abort All</span>
+          </div>
         </div>
         <div class="buttons-set-container">
           <p>Flight Commands</p>
