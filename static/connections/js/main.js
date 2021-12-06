@@ -7,7 +7,10 @@ var updateSocket = new WebSocket('ws://localhost:8000/ws/update-periodically/');
 // List of active devices that'll show at 'select' field
 var activeDevicesId = []
 
-document.querySelector('#ip-connected').innerText = "IP: OK";
+// Set the interface status to connected, if POST socket is Open
+if(receivePostSocket.readyState === WebSocket.OPEN || receivePostSocket.readyState === WebSocket.CONNECTING){
+  document.querySelector('#ip-connected').innerText = "IP: OK";
+}
 
 function sendCommand(type) {
   // Send the selected command to a set of devices, obtained from getDeviceReceive()
@@ -16,17 +19,23 @@ function sendCommand(type) {
   // id - (int) id of the groundstation
   // type - (int) integer that represent what this command will do (see table of commands)
   // receiver - (int) ID of the active device on the 'select-device list'
+  //            note if the command will be sent to all devices, the ID will be 'all'
 
-  jsonToSend = {id: 1, type: type, seq: 0, lat: -9, lng: 10, alt: 11, DATA: "0"}
+  jsonToSend = {id: 1, type: type}
   jsonToSend["receiver"] = getDeviceReceiver();
 
   jsonToSend = JSON.stringify(jsonToSend);
   console.log(jsonToSend);
-
+  
+  // Send the command to the Consumers.
+  // The PostConsumer will receive the command and handle it
   if (receivePostSocket.readyState == WebSocket.OPEN) {
     receivePostSocket.send(jsonToSend);
     notifyUiWhenJsonSent(jsonToSend);
   }
+
+  // The ReceiveCommandConsumer will receive the command and handle it
+  // Note this is the Serial Consumer, in charge to stablish and change messages with serial connected device
   if (sendCommandSocket.readyState == WebSocket.OPEN) {
     //sendCommandSocket.send(jsonToSend);
     //notifyUiWhenJsonSent(jsonToSend);
@@ -81,11 +90,11 @@ function removeCommandOption(id) {
   if(matchingId != -1) {
     selectElement.remove(matchingId);
     activeDevicesId = activeDevicesId.filter(deviceId => id !== deviceId);
-    //console.log(activeDevicesId);
   }
 }
 
 function notifyUiWhenJsonSent(jsonSent) {
+  // Insert on interface visual log the command sent.
   var element = document.getElementById('actions-logs');
   var p = document.createElement("p");
   p.appendChild(document.createTextNode("Command sent: " + jsonSent));
@@ -95,6 +104,7 @@ function notifyUiWhenJsonSent(jsonSent) {
 }
 
 function notifyUiWhenJsonReceived(jsonReceived, msg) {
+  // Insert on interface visual log the message received
   var element = document.getElementById('actions-logs');
   var p = document.createElement("p");
   p.appendChild(document.createTextNode(msg + jsonReceived));
@@ -104,6 +114,10 @@ function notifyUiWhenJsonReceived(jsonReceived, msg) {
 }
 
 function checkJsonType(msg) {
+  // The main logic to handle received messages
+  // A message will try to be parsed to JSON format, and it's 'type' will contain what the message represents
+  // The type 102 represents a location update message, and it'll be reflected on Google Maps.
+  // All messages are shown on interface visual log
   try {
     var djangoData = JSON.parse(msg.data);
     console.log(djangoData);
@@ -114,61 +128,39 @@ function checkJsonType(msg) {
     msgDrone = 'UAV info: ';
 
     switch(json_type) {
-      case 13:  //Esperando conexão
-      document.querySelector('#serial-connected').innerText = "";
-        document.querySelector('#serial-disconnected').innerText = 'UART: OFF';
-        break;
-      case 14:  //Conectado
-        document.querySelector('#serial-disconnected').innerText = "";
-        document.querySelector('#serial-connected').innerText = 'UART: ON';
-        break;
-      case 21:  //cmd-led-on-ACK
-        notifyUiWhenJsonReceived(msg.data, msgUi);
-        break;
-      case 23:  //cmd-led-off-ACK
-        notifyUiWhenJsonReceived(msg.data, msgUi);
-        break;
-      case 25: //forward 1 ACK
-        notifyUiWhenJsonReceived(msg.data, msgUi);
-        break;
-      case 27: //forward 2 ACK
-        notifyUiWhenJsonReceived(msg.data, msgUi);
-        break;
-      case 29: //Voo iniciado ACK
-        notifyUiWhenJsonReceived(msg.data, msgUi);
-        break;
-      case 31: //Voo abortado ACK
-        notifyUiWhenJsonReceived(msg.data, msgUi);
-        break;
-      case 102: //Informação do device recebido
+      case 102: // Device information received
         var id = djangoData['id'];
         var lat = parseFloat(djangoData['lat']);
         var lng = parseFloat(djangoData['lng']);
         var status = djangoData.hasOwnProperty('status') ? djangoData['status'] : 'active';
         var deviceType = djangoData.hasOwnProperty('device') ? djangoData['device'] : 'uav';
 
-        //Adiciona novo device nas opções de comando
+        // Add device as a new option in Select list, if not already included
         if(!verifyActiveDevices(id)){
           if(status != 'inactive') {
             activeDevicesId.push(id);
             pushNewCommandOption(id, deviceType);
           }
         }
-        else {
-          //Retira device se está nas opções e está inativo
-          if(status == 'inactive') {
-            removeCommandOption(id);
-          }
-        }
+        // else {
+        //   //Retira device se está nas opções e está inativo
+        //   if(status == 'inactive') {
+        //     removeCommandOption(id);
+        //   }
+        // }
 
         notifyUiWhenJsonReceived(msg.data, msgDrone);
+        // Insert/Update the marker on Google Maps, with it's location
         gmap.newMarker(id, lat, lng, status, deviceType);
         break;
+
+      // The default behavior to other types not included above
       default:
         notifyUiWhenJsonReceived(msg.data, msgDefault);
         break;
     }
   } catch(e) {
+    // If it's not a JSON, it'll show the message on interface visual log
     notifyUiWhenJsonReceived(msg.data);
   }
 }

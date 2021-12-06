@@ -4,11 +4,21 @@ dump.rdb
 .env
 connections/LOGS/exceptions/*
 connections/LOGS/info/*
+uav_simulator/LOGS sim/exceptions/*
+uav_simulator/LOGS sim/info/*
 !connections/LOGS/exceptions/.gitkeep
 !connections/LOGS/info/.gitkeep
 uav_simulator/*.bin
 uav_simulator/*.parm
 uav_simulator/*.tlog
 uav_simulator/*.raw
-uav_simulator/logs/*
 uav_simulator/terrain/*
+uav_simulator/logs/*
+uav_simulator/LOGS_sim/exceptions/*
+uav_simulator/LOGS_sim/info/*
+terrain/*
+logs/*
+*.bin
+*.parm
+*.tlog
+*.raw

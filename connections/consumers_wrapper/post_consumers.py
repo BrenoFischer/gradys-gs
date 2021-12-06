@@ -41,18 +41,30 @@ class PostConsumer(AsyncWebsocketConsumer):
     # Send POST request to specific URL (representing a specific device)
     async with aiohttp.ClientSession() as session:
       print(f'Enviando: {json_to_send}')
+
+      # Logging the information to send
+      logger.log_info(source='gs', data=json_to_send, code_origin='send-post')
+
       async with session.post(url, data=json_to_send) as resp:
-        response = await resp.json() 
+        response = await resp.json()
+        print(f'Django recebeu resposta do POST request: {response}')
+
+        # Logging the response
+        source = json_to_send['device'] + '-' + str(json_to_send['id'])
+        logger.log_info(source=source, data=response, code_origin='send-post-response')
 
 
-  async def send_get_specific_device(self, url):
+  async def send_get_specific_device(self, url, id, device_type):
     # Send GET request to specific URL (representing a specific device), wait for response and send to JS via socket
     async with aiohttp.ClientSession() as session:
+      logger.log_info(source='gs', data=url, code_origin='send-get')
+      
       async with session.get(url) as resp:
         response_from_device = await resp.json(content_type=None)
         print(f'Django recebeu resposta do GET request: {response_from_device}')
 
-        logger.log_info(source=response_from_device['device'], data=response_from_device)
+        source = device_type + '-' + str(id)
+        logger.log_info(source=source, data=response_from_device, code_origin='send-get-response')
         await self.send(json.dumps(response_from_device))
 
 
@@ -63,12 +75,10 @@ class PostConsumer(AsyncWebsocketConsumer):
     while True:
       for device in device_to_send_list:
         ip = device['ip']
-        print(ip)
         command_path_list = config['commands-list'][str(command)].split(',')
-        print(command_path_list)
         endpoint = command_path_list[0]
         url = ip + endpoint
-        task = asyncio.create_task(self.send_get_specific_device(url))
+        task = asyncio.create_task(self.send_get_specific_device(url, device['id'], device['device']))
         self.async_tasks.append(task)
       await asyncio.sleep(SECONDS_TO_WAIT)
 
@@ -101,10 +111,12 @@ class PostConsumer(AsyncWebsocketConsumer):
         url = ip + endpoint
         # Json_to_send will have the correct ID in the 'id' field
         json_to_send = replicate_dict_new_id(id, received_json)
+        # Insert device_type in json_to_send
+        json_to_send['device'] = device['device']
 
         if command_path_list[1] == 'get':
           #GET request
-          task = asyncio.create_task(self.send_get_specific_device(url))
+          task = asyncio.create_task(self.send_get_specific_device(url, id, device['device']))
         else:
           # POST request
           task = asyncio.create_task(self.send_post_specific_device(url, json_to_send))
@@ -113,8 +125,6 @@ class PostConsumer(AsyncWebsocketConsumer):
 
   async def receive(self, text_data):
     # Receive msg (text_data) from socket and call 'send_via_http' method to handle it 
-    logger.log_info(source="GS", data=text_data)
-    
     await self.send_via_http(text_data)
 
 
@@ -126,7 +136,8 @@ class PostConsumer(AsyncWebsocketConsumer):
 
     append_device_to_persistant_list(data)
 
-    logger.log_info(source=data['device'], data=data)
+    source = data['device'] + '-' + str(data['id'])
+    logger.log_info(source=source, data=data, code_origin='receive-info')
     try:
       await self.send(json.dumps(data)) # Send to JS via socket
     except Exception:

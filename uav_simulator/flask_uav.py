@@ -64,6 +64,9 @@ import threading
 import atexit
 import requests
 
+# Import from inside project
+from utils.logger import Logger
+
 
 # Json stuff
 #import json
@@ -1541,7 +1544,7 @@ Also, ignores heartbeats not from our target system"""
 #----------------------------------------------------------------------
 # Threading for flask 
 #
-POOL_TIME = 1 #Seconds
+POOL_TIME = 5 #Seconds
 
 # variables that are accessible from anywhere
 commonDataStruct = {}
@@ -1681,12 +1684,11 @@ def create_app():
     def flask_position_relative_json():
         global copter
         targetpos = copter.mav.location(relative_alt=False)
-        json_tmp = '{"id": ' + str(args.uav_sysid) + ',lat": ' + str(targetpos.lat) + ',"lng": ' + str(targetpos.lng) + ',"alt":' + str(targetpos.alt) + '}'
+        json_tmp = '{"id": ' + str(args.uav_sysid) + ',"lat": ' + str(targetpos.lat) + ',"lng": ' + str(targetpos.lng) + ',"alt":' + str(targetpos.alt) + '}'
         #return json.dumps(json_tmp)
-        #print(json_tmp)
+        print(json_tmp)
         #print(json
         return json_tmp
-
     ##########################################################################
 
 
@@ -1704,7 +1706,9 @@ def create_app():
             config_from_django.read('../config.ini')
             path_to_post = config_from_django['post']['ip'] + config_from_django['post']['path_receive_info']
             targetpos = copter.mav.location(relative_alt=True)
-            json_tmp = {"id": int(args.uav_sysid), "lat": str(targetpos.lat), "lng": str(targetpos.lng), "alt": str(targetpos.alt)}
+            uav_id = int(args.uav_sysid)
+            
+            json_tmp = {"id": uav_id, "lat": str(targetpos.lat), "lng": str(targetpos.lng), "alt": str(targetpos.alt)}
             json_tmp['device'] = 'uav'
             json_tmp['type'] = 102
             json_tmp['seq'] = 0
@@ -1713,13 +1717,18 @@ def create_app():
             else:
                 json_tmp['ip'] = config_from_django['uav-simulator']['uav_url'] + ':' + flask_port + '/'
 
-            r = requests.post(path_to_post, data=json_tmp)
-            print(r.status_code, r.reason)
-            # Do your stuff with commonDataStruct Here
+            try:
+                r = requests.post(path_to_post, data=json_tmp)
+                print(r.status_code, r.reason)
+                logger.log_info(r, f'uav-sim{uav_id}')
+            except:
+                print('Error when sending information. Logging...')
+                logger.log_except()
 
         # Set the next thread to happen
         yourThread = threading.Timer(POOL_TIME, doStuff, ())
-        yourThread.start()   
+        yourThread.start()
+
 
     def doStuffStart():
         # Do initialisation stuff here
@@ -1742,6 +1751,8 @@ def create_app():
 if (args.uav_sysid == -1) or (args.uav_udp_port == -1):
     print("Bad parameters. Check uav_sysid and uav_udp_port")
     sys.exit(1)
+
+logger = Logger()
 
 print("Running MAIN!!!")
 copter = Copter(sysid=int(args.uav_sysid))
