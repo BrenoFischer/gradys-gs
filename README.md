@@ -78,12 +78,18 @@ The framework will load automatically these as environment variables. With both 
 Django provides lightweight development Web server, that you can use via manage.py file. By default, the server runs on port 8000 on the IP address 127.0.0.1 and should not be used on production.
 You can run with:
 ```console
+Windows
 C:\path-to-this-cloned-repository\> python manage.py runserver
+```
+```console
+Linux
+gradys-gs$ python manage.py runserver
 ```
 Or, with diferent IP/PORT, in this example Port 8000 on IP address 1.2.3.4:
 ```console
 C:\path-to-this-cloned-repository\> python manage.py runserver 1.2.3.4:8000
 ```
+Remember to insert, inside config.ini file, the correct IP + Port, on [post] category, if changed when running the command above.
 
 ## Connecting to home page:
 You should be able to connect to the home page now, acessing, on your browser, the IP/PORT the server is up, on default: localhost:8000.
@@ -92,6 +98,12 @@ You should be able to connect to the home page now, acessing, on your browser, t
 # Project Struct
 Gradys Ground Station is structured following the classic concept of web development, with Front-end module, responsible for the interface and visualization, and Back-end module, responsible for server-side information processing. Front-end is built with Javascript language, HTML, or [Template language](https://docs.djangoproject.com/en/3.2/ref/templates/language/) from Django, and Cascading Style Sheets (CSS) language. Back-end is mainly built with Python language, using [Django Framework](https://www.djangoproject.com/).
 Both modules comunicate with each other via WebSocket channels. A socket connection is a dedicated full-duplex channel based in the Transmission Control Protocol (TCP). This project uses [Django Channels](https://channels.readthedocs.io/en/stable/) library to handle WebSockets communication.
+
+![Project Architecture](/readme_images/architecture.png)
+
+The main project architecture are represented with two main modules, front-end and back-end. They communicate with each other after establishing a websocket connection, exchanging JSONs. The submodule, containing javascript files, start the socket connection with a route stated inside Django Channels submodule.
+<br>
+The information gate of the ground station is through Connection submodule, which constains the routes and logic to receive/send information.  
 
 
 ## Django
