@@ -2,10 +2,12 @@
 venv/
 dump.rdb
 .env
+connections/LOGS/*.log
 connections/LOGS/exceptions/*
 connections/LOGS/info/*
-uav_simulator/LOGS sim/exceptions/*
-uav_simulator/LOGS sim/info/*
+connections/LOGS_sim/*.log
+uav_simulator/LOGS_sim/exceptions/*
+uav_simulator/LOGS_sim/info/*
 !connections/LOGS/exceptions/.gitkeep
 !connections/LOGS/info/.gitkeep
 uav_simulator/*.bin
