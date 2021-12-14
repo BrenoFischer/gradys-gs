@@ -61,8 +61,8 @@ gradys-gs$ pip install -r requeriments_linux.txt
 
 
 # Usage
-## Secret variables:
-This project uses Google Maps services, with paid features. To use these functionalities you need to have or create a Google Maps API Key. [Google's guide on how to create an API Key](https://developers.google.com/maps/gmp-get-started).
+## Secret variables
+This project uses Google Maps services, with paid features. To use these functionalities you need to have or create a Google Maps API Key. [Google's guide on how to create an API Key](https://developers.google.com/maps/gmp-get-started).</br>
 This project also use Django Framework that has a secret key variable, for security purposes.
 You can [generate your Django secret key here](https://djecrety.ir/).
 The framework will load automatically these as environment variables. With both private keys created, 
@@ -74,7 +74,7 @@ The framework will load automatically these as environment variables. With both 
     *Changing 'xxxx' with your Google Maps key*
 <!--te-->
 
-## Running the server:
+## Running the server
 Django provides lightweight development Web server, that you can use via manage.py file. By default, the server runs on port 8000 on the IP address 127.0.0.1 and should not be used on production.
 You can run with:
 ```console
@@ -85,13 +85,13 @@ C:\path-to-this-cloned-repository\> python manage.py runserver
 Linux
 gradys-gs$ python manage.py runserver
 ```
-Or, with diferent IP/PORT, in this example Port 8000 on IP address 1.2.3.4:
+Or, with diferent IP/PORT, in the example below, Port 8000 on IP address 0.0.0.0. This IP is will listen to all IP adresses the machine supports. So for example, with this server configuration up, you can open the web navigator with localhost:8000 and the inet ip obtainable from ifconfig (linux environment):
 ```console
-C:\path-to-this-cloned-repository\> python manage.py runserver 1.2.3.4:8000
+C:\path-to-this-cloned-repository\> python manage.py runserver 0.0.0.0:8000
 ```
-Remember to insert, inside config.ini file, the correct IP + Port, on [post] category, if changed when running the command above.
+Remember to insert, inside config.ini file, the correct IP + Port, on [post] category, if changed to a specific IP, when running the command above.
 
-## Connecting to home page:
+## Connecting to home page
 You should be able to connect to the home page now, acessing, on your browser, the IP/PORT the server is up, on default: localhost:8000.
 
 
@@ -101,9 +101,9 @@ Both modules comunicate with each other via WebSocket channels. A socket connect
 
 ![Project Architecture](/readme_images/architecture.png)
 
-The main project architecture are represented with two main modules, front-end and back-end. They communicate with each other after establishing a websocket connection, exchanging JSONs. The submodule, containing javascript files, start the socket connection with a route stated inside Django Channels submodule.
+The main project architecture are represented with the two main modules, front-end and back-end. They communicate with each other after establishing a websocket connection, exchanging JSONs. The submodule, containing javascript files, start the socket connection with a route stated inside Django Channels submodule.
 <br>
-The information gate of the ground station is through Connection submodule, which constains the routes and logic to receive/send information.  
+The information gate of the ground station is through Connections submodule, which constains the routes and logic to receive/send information.  
 
 
 ## Django
@@ -112,7 +112,7 @@ The information gate of the ground station is through Connection submodule, whic
 
 To understand the server-side struct of this project, first it's required a basic understanding of how Django is structured and how it operates.
 Building a URL scheme with Django is a simple task, thanks to the URL/View mapping that the python web framework provides.
-When a user requests a page from the URL schema, Django does a mapping to the corresponding Python function, that's called *View*.
+When a user requests a page from the URL schema, Django does a mapping to the corresponding Python function, that's called *View*.</br>
 So, for example, the URL scheme below has a mapping between the **home page** path and **index** view, also between ***/command/*** path (note that 'command' is a simple integer) and **receive_command_test** view.
 ```python
 urlpatterns = [
@@ -246,7 +246,7 @@ socket.onmessage = function(msg) {
 ```
 <!--te-->
 
-### Command Buttons
+## Command Buttons
 Another important functionality in this framework is the possibility to send commands, through the interface, to available devices.
 We can register a new button inside the template, create a onClick callback function and send the command via websocket to Django (back-end).
 <!--ts-->
@@ -275,6 +275,29 @@ function sendCommand(type) {
 <!--te-->
 Notice that the socket object must be instatiated already, and the connection 'OPEN'.
 The corresponding Consumer will receive the message and handle, acording to it's command type.
+
+### Command button logic
+You already have a button on interface that sends a command, in this case '40', to a Consumer. This Consumer will be in charge to the command logic.
+</br>
+Inside the <i>'receive'</i> method of this Consumer's Class, it's up to you to write the command's logic, according to your communication protocol.
+</br>
+When handling with HTTP requests, you can insert the new command to  the command's list, inside config.ini file. The Consumer can iterate this list and check the command received, mapping to the right endpoint.
+```javascript
+[commands-list]
+20 = position_absolute_json,get
+22 = position_relative_json,post
+32 = takeoff_and_hold,get
+...
+```
+This list contains a number as the key to the corresponding endpoint address, that will receive the HTTP request. The type of request is represented after the comma, with no spaces. If your communication is using HTTP requests and this list, your new list, with the new command, should look like this:
+```javascript
+[commands-list]
+20 = position_absolute_json,get
+22 = position_relative_json,post
+32 = takeoff_and_hold,get
+...
+40 = new_endpoint,get
+```
 
 ## Communicating with external devices
 The main purpose of this framework is to exchange information with other devices. Currently there is implemented two ways for external connections.
@@ -316,7 +339,8 @@ This structure is described with more details below, on the Project Struct topic
 Inside the *config.ini* file, below the [post] tag, you can change some of the protocol's variables:
 ```python
 [post]
-# Default ip/port, if device don't provide on message sent
+# Default ip/port of django's server.
+# If started on a different configuration, you need to change it here.
 ip = http://127.0.0.1:8000/
 
 # Endpoint that'll receive POST requests with device's information
@@ -337,6 +361,8 @@ seconds_to_device_be_on_hold = 25
 # The amount of seconds to update the list of devices in Front-End
 update_delay = 20
 ```
+
+
 
 
 ## Folders structure
