@@ -5,7 +5,7 @@ dump.rdb
 connections/LOGS/*.log
 connections/LOGS/exceptions/*
 connections/LOGS/info/*
-connections/LOGS_sim/*.log
+uav_simulator/LOGS_sim/*.log
 uav_simulator/LOGS_sim/exceptions/*
 uav_simulator/LOGS_sim/info/*
 !connections/LOGS/exceptions/.gitkeep
