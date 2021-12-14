@@ -1544,7 +1544,7 @@ Also, ignores heartbeats not from our target system"""
 #----------------------------------------------------------------------
 # Threading for flask 
 #
-POOL_TIME = 5 #Seconds
+POOL_TIME = 1 #Seconds
 
 # variables that are accessible from anywhere
 commonDataStruct = {}
@@ -1552,6 +1552,8 @@ commonDataStruct = {}
 dataLock = threading.Lock()
 # thread handler
 yourThread = threading.Thread()
+# simple sequential int to check package loss
+seq = 0
 
 def create_app():
     global app
@@ -1699,11 +1701,13 @@ def create_app():
     def doStuff():
         global commonDataStruct
         global yourThread
+        global seq
         with dataLock:
             #sample print('Safe print regardless race condition...')
             global copter
             config_from_django = configparser.ConfigParser()
             config_from_django.read('../config.ini')
+            # The groundstation address this uav will send information 
             path_to_post = config_from_django['post']['ip'] + config_from_django['post']['path_receive_info']
             targetpos = copter.mav.location(relative_alt=True)
             uav_id = int(args.uav_sysid)
@@ -1711,7 +1715,10 @@ def create_app():
             json_tmp = {"id": uav_id, "lat": str(targetpos.lat), "lng": str(targetpos.lng), "alt": str(targetpos.alt)}
             json_tmp['device'] = 'uav'
             json_tmp['type'] = 102
-            json_tmp['seq'] = 0
+            json_tmp['seq'] = seq
+            seq += 1
+            # The IP:Port of this uav
+            #ipv4 = os.popen('ip addr show eth0').read().split("inet ")[1].split("/")[0]
             if (str(args.uav_ip)):
                 json_tmp['ip'] = str(args.uav_ip) + ':' + flask_port + '/'
             else:
