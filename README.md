@@ -2,7 +2,7 @@
 Web application, from Project GrADyS, to monitor, control and display mobile devices networks in field tests
 
 # Introduction
-This is a repository for the Ground Station framework, developed for the GrADyS project and future IoT projects. It's an extensible and reusable framework, to help visualizing the location and activity status of interconnected network nodes, monitor and store the flow of data and send commands to a set of devices with different protocols. The framework is developed to be extensible, introducing ways to insert new buttons, commands, protocols and funcionalities, according to the project's needs.
+This is a repository for the Ground Station framework, developed for the GrADyS project and future IoT projects. It's an extensible and reusable framework to help visualize the location and activity status of interconnected network nodes, monitor and store the flow of data and send commands to a set of devices with different protocols. According to the project's needs, the framework is extensible, introducing ways to insert new buttons, commands, protocols, and functionalities.
 
 ![Main showcase](/readme_images/mainShowcase.gif)
 
@@ -12,7 +12,7 @@ In order to use the components in this repository, you need to have Python 3.0 o
 To install Python on Windows, [follow these instructions](https://docs.python.org/3/using/windows.html).
 After installing Python, pip should be installed by default. You can check if it's already installed and it's version:
 ```console
-C:\> python -m pip --version
+C:\> python3 -m pip --version
 ```
 If not installed or need to updgrade, you can get more information [here](https://pip.pypa.io/en/stable/getting-started/).
 
@@ -23,7 +23,7 @@ With Python3 installed, you should be able to clone this repository. [More infor
 In order to keep this framework in a separate environment, with it's own packages and versions, it's recommended to create a virtual environment. On Windows:
 ```console
 Windows
-C:\> python -m venv C:\path-to-this-cloned-repository/venv
+C:\> python3 -m venv C:\path-to-this-cloned-repository/venv
 ```
 On Linux, you can check if virtualenv is already installed, install it, if not already installed, and create the venv:
 ```console
@@ -50,44 +50,45 @@ If you need more information about virtual environments with python, it [can be 
 The list of necessary packages are inside requeriments.txt file. It'll be installed automatically, using the Python package manager, pip. You can install, running on Windows console:
 ```console
 Windows
-C:\path-to-this-cloned-repository\> pip install -r requeriments.txt
+C:\path-to-this-cloned-repository\> pip3 install -r requeriments.txt
 ```
 
 On Linux, you should run the compatible script file, requeriments_linux.txt:
 ```console
 Linux
-gradys-gs$ pip install -r requeriments_linux.txt
+gradys-gs$ pip3 install -r requeriments_linux.txt
 ```
 
-
-# Usage
 ## Secret variables
-This project uses Google Maps services, with paid features. To use these functionalities you need to have or create a Google Maps API Key. [Google's guide on how to create an API Key](https://developers.google.com/maps/gmp-get-started).</br>
+This project uses Google Maps services, with paid features IFF used above a threshold. To use these functionalities you need to have or create a Google Maps API Key. [Google's guide on how to create an API Key](https://developers.google.com/maps/gmp-get-started).</br>
 This project also use Django Framework that has a secret key variable, for security purposes.
 You can [generate your Django secret key here](https://djecrety.ir/).
 The framework will load automatically these as environment variables. With both private keys created, 
 <!--ts-->
-  * Inside */config/.env*, insert the secret keys:
+  * Create a file named */config/.env* and insert the secret keys:
     * SECRET_KEY='xxxx'
-    *Changing 'xxxx' with your Django secret key*
+    *Changing xxxx with your Django secret key*
     * GOOGLE_MAPS_API_KEY='xxxx'
-    *Changing 'xxxx' with your Google Maps key*
+    *Changing xxxx with your Google Maps key (Maps javascript API on your Google Cloud API)*
+    * You shall maintain the ' ' from the 'xxxx'
 <!--te-->
+
+# Usage
 
 ## Running the server
 Django provides lightweight development Web server, that you can use via manage.py file. By default, the server runs on port 8000 on the IP address 127.0.0.1 and should not be used on production.
 You can run with:
 ```console
 Windows
-C:\path-to-this-cloned-repository\> python manage.py runserver
+C:\path-to-this-cloned-repository\> python3 manage.py runserver
 ```
 ```console
 Linux
-gradys-gs$ python manage.py runserver
+gradys-gs$ python3 manage.py runserver
 ```
 Or, with diferent IP/PORT, in the example below, Port 8000 on IP address 0.0.0.0. This IP is will listen to all IP adresses the machine supports. So for example, with this server configuration up, you can open the web navigator with localhost:8000 and the inet ip obtainable from ifconfig (linux environment):
 ```console
-C:\path-to-this-cloned-repository\> python manage.py runserver 0.0.0.0:8000
+C:\path-to-this-cloned-repository\> python3 manage.py runserver 0.0.0.0:8000
 ```
 Remember to insert, inside config.ini file, the correct IP + Port, on [post] category, if changed to a specific IP, when running the command above.
 
@@ -95,7 +96,7 @@ Remember to insert, inside config.ini file, the correct IP + Port, on [post] cat
 You should be able to connect to the home page now, acessing, on your browser, the IP/PORT the server is up, on default: localhost:8000.
 
 
-# Project Struct
+# Project Architecture and customization
 Gradys Ground Station is structured following the classic concept of web development, with Front-end module, responsible for the interface and visualization, and Back-end module, responsible for server-side information processing. Front-end is built with Javascript language, HTML, or [Template language](https://docs.djangoproject.com/en/3.2/ref/templates/language/) from Django, and Cascading Style Sheets (CSS) language. Back-end is mainly built with Python language, using [Django Framework](https://www.djangoproject.com/).
 Both modules comunicate with each other via WebSocket channels. A socket connection is a dedicated full-duplex channel based in the Transmission Control Protocol (TCP). This project uses [Django Channels](https://channels.readthedocs.io/en/stable/) library to handle WebSockets communication.
 
