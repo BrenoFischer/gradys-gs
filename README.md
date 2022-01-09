@@ -47,7 +47,7 @@ gradys-gs$ source venv/bin/activate
 If you need more information about virtual environments with python, it [can be found here](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment).
 
 ## Installing necessary packages
-The list of necessary packages are inside requeriments.txt file. It'll be installed automatically, using the Python package manager, pip. You can install, running on Windows console:
+The list of necessary packages are inside requeriments.txt file, if you are using Windows. It'll be installed automatically, using the Python package manager, pip. You can install, running on Windows console:
 ```console
 Windows
 C:\path-to-this-cloned-repository\> pip install -r requeriments.txt
@@ -92,7 +92,7 @@ C:\path-to-this-cloned-repository\> python manage.py runserver 0.0.0.0:8000
 Remember to insert, inside config.ini file, the correct IP + Port, on [post] category, if changed to a specific IP, when running the command above.
 
 ## Connecting to home page
-You should be able to connect to the home page now, acessing, on your browser, the IP/PORT the server is up, on default: localhost:8000.
+Now you should be able to connect to the home page, acessing, on your browser, the IP/PORT the server is up, on default: localhost:8000.
 
 
 # Project Struct
@@ -245,6 +245,13 @@ socket.onmessage = function(msg) {
 }
 ```
 <!--te-->
+
+## Sequence Diagram
+The sequence message diagram below represents the messages flow between external devices and the main modules from this framework.
+
+![Project Architecture](/readme_images/sequenceDiagram.png)
+
+Note that the message protocol between the framework and external devices can differ from project to project, changing the way the information is delivered or the commands are handled. But the messages flow between the back-end and front-end modules should remain similar to this diagram.
 
 ## Command Buttons
 Another important functionality in this framework is the possibility to send commands, through the interface, to available devices.
