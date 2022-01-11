@@ -63,21 +63,27 @@ class PostConsumer(AsyncWebsocketConsumer):
         response_from_device = await resp.json(content_type=None)
         print(f'Django recebeu resposta do GET request: {response_from_device}')
 
+        # Logging the GET request response and original information
         source = device_type + '-' + str(id)
         logger.log_info(source=source, data=response_from_device, code_origin='send-get-response')
+        # Updating the interface with the response
         await self.send(json.dumps(response_from_device))
 
 
   async def keep_abort_all(self, command):
+    # Keep sending /rtl to all devices, to abort all missions
     SECONDS_TO_WAIT = 4
-    # Keep sending /rtl to all devices, to abort all
+    # Get from persistant list all the registred devices
     device_to_send_list = get_device_from_list_by_id('all')
+
     while True:
       for device in device_to_send_list:
-        ip = device['ip']
+        # Get the specific command path of the endpoint address
         command_path_list = config['commands-list'][str(command)].split(',')
         endpoint = command_path_list[0]
-        url = ip + endpoint
+        url = device['ip'] + endpoint
+
+        # Create the GET request task
         task = asyncio.create_task(self.send_get_specific_device(url, device['id'], device['device']))
         self.async_tasks.append(task)
       await asyncio.sleep(SECONDS_TO_WAIT)
