@@ -1609,6 +1609,9 @@ def create_app():
 
     @app.route('/auto')
     def flask_auto():
+        # Mudar para sample
+        # Criar uma nova /auto
+        # Criar uma nova /experiment
         global copter
         print("Let's wait ready to arm")
         # We wait that can pass all arming check
@@ -1713,7 +1716,7 @@ def create_app():
             targetpos = copter.mav.location(relative_alt=True)
             uav_id = int(args.uav_sysid)
             
-            # The realt time coordinates of the UAV
+            # The real time coordinates of the UAV
             json_tmp = {"id": uav_id, "lat": str(targetpos.lat), "lng": str(targetpos.lng), "alt": str(targetpos.alt)}
             # The device type
             json_tmp['device'] = 'uav'
