@@ -7,6 +7,8 @@ var updateSocket = new WebSocket('ws://localhost:8000/ws/update-periodically/');
 // List of active devices that'll show at 'select' field
 var activeDevicesId = []
 
+var autoScroll = true;
+
 // Set the interface status to connected, if POST socket is Open
 if(receivePostSocket.readyState === WebSocket.OPEN || receivePostSocket.readyState === WebSocket.CONNECTING){
   document.querySelector('#ip-connected').innerText = "IP: OK";
@@ -111,6 +113,10 @@ function notifyUiWhenJsonReceived(jsonReceived, msg) {
   p.className += "json-received";
 
   element.prepend(p);
+  if(autoScroll == true) {
+    var elem= document.getElementById('logs');
+    elem.scroll(0, 0);
+  }
 }
 
 function checkJsonType(msg) {
@@ -162,6 +168,15 @@ function checkJsonType(msg) {
   } catch(e) {
     // If it's not a JSON, it'll show the message on interface visual log
     notifyUiWhenJsonReceived(msg.data);
+  }
+}
+
+function checkScroll(checkbox) {
+  if(checkbox.checked) {
+    autoScroll = true;
+  }
+  else {
+    autoScroll = false;
   }
 }
 

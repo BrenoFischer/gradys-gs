@@ -14,6 +14,13 @@
         <div id="map"></div>
       </div>
       <div class="section-container command-buttons">
+        <div class="buttons-set-container">
+          <p>Configuration</p>
+          <div class="scroll-checkbox">
+            <input type="checkbox" name="scroll-checkbox" onclick="checkScroll(this)" checked />
+            <span>Auto Scroll</span>
+          </div>
+        </div>
         <div class="select-container">
           <p>Select the device</p>
           <select id="select-device">
@@ -40,7 +47,7 @@
           <input class="button" id="takeoff-and-hold" type="button" value="Takeoff and Hold">
         </div>
       </div>
-      <div class="section-container log">
+      <div class="section-container log" id="logs">
         <div id="actions-logs"></div>
       </div>
       <div class="section-container connection-status">
