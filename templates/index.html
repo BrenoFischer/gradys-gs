@@ -16,9 +16,9 @@
       <div class="section-container command-buttons">
         <div class="buttons-set-container">
           <p>Configuration</p>
-          <div class="scroll-checkbox">
-            <input type="checkbox" name="scroll-checkbox" onclick="checkScroll(this)" checked />
-            <span>Auto Scroll</span>
+          <div class="checkbox-container">
+            <input type="checkbox" name="scroll-checkbox" onclick="checkScroll(this)" class="custom-checkbox" checked />
+            <label>Auto Scroll</label>
           </div>
         </div>
         <div class="select-container">
@@ -38,8 +38,10 @@
           <input class="button" id="run-experiment" type="button" value="Run Experiment">
           <input class="button" id="set-auto" type="button" value="Set Auto">
           <div>
-            <input type="checkbox" name="abort-all-checkbox" onclick="checkAbort(this)" />
-            <span>Abort All</span>
+            <div class="checkbox-container">
+              <input type="checkbox" name="abort-all-checkbox" onclick="checkAbort(this)" class="custom-checkbox"/>
+              <label>Abort All</label>
+            </div>
           </div>
         </div>
         <div class="buttons-set-container">
