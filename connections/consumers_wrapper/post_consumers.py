@@ -89,27 +89,25 @@ class PostConsumer(AsyncWebsocketConsumer):
       await asyncio.sleep(SECONDS_TO_WAIT)
 
 
-  async def check_cancel_mission(self, command):
+  async def treat_checkbox_cmds(self, command):
     # Auxiliary function to check and execute special command to keep the order to cancel a mission or not
-    cmd_to_keep_canceling = int(config['specific-commands']['keep_canceling'])
-    cmd_to_stop_canceling = int(config['specific-commands']['stop_canceling'])
+    cmd_to_keep_canceling = int(config['checkbox-commands']['keep_canceling'])
+    cmd_to_stop_canceling = int(config['checkbox-commands']['stop_canceling'])
 
-    if (command == cmd_to_keep_canceling) or (command == cmd_to_stop_canceling):
-      if command == cmd_to_stop_canceling:
-        # Checkbox is not checked anymore, cancel all is canceled
-        if self.cancel_all_task:
-          self.cancel_all_task.cancel()
-      if command == cmd_to_keep_canceling:
-        # Checkbox is checked, cancel all is running. Creating a task to keep sending /rtl
-        self.cancel_all_task = asyncio.create_task(self.keep_cancel_all(cmd_to_keep_canceling))
-      return True
-    return False
+    if command == cmd_to_stop_canceling:
+      # Checkbox to cancel all missions is not checked anymore
+      if self.cancel_all_task:
+        self.cancel_all_task.cancel()
+    if command == cmd_to_keep_canceling:
+      # Checkbox to cancel all missions is checked. Creating a task to keep sending /rtl
+      self.cancel_all_task = asyncio.create_task(self.keep_cancel_all(cmd_to_keep_canceling))
 
 
   async def send_via_http(self, text_data):
     # The command received via socket will be processed 
     received_json = json.loads(text_data)
 
+    button_type = received_json['button_type']
     device_receiver_id = str(received_json['receiver'])
     command = str(received_json['type'])
 
@@ -117,8 +115,10 @@ class PostConsumer(AsyncWebsocketConsumer):
     # Or get all persistent list if device_receiver_id is 'all'.
     device_to_send_list = get_device_from_list_by_id(device_receiver_id)
 
-    # Call and check if it's a command to treat differently
-    if await self.check_cancel_mission(int(command)) == False:
+    # Checkbox commands are treat differently
+    if button_type == "checkbox":
+      await self.treat_checkbox_cmds(int(command))
+    else:
       for device in device_to_send_list:
         ip = device['ip']
         id = str(device['id'])
