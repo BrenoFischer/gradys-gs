@@ -7,21 +7,26 @@ var updateSocket = new WebSocket('ws://localhost:8000/ws/update-periodically/');
 // List of active devices that'll show at 'select' field
 var activeDevicesId = []
 
+// Control if the log text autoscroll is available or not
+var autoScroll = true;
+
 // Set the interface status to connected, if POST socket is Open
-if(receivePostSocket.readyState === WebSocket.OPEN || receivePostSocket.readyState === WebSocket.CONNECTING){
+if(receivePostSocket.readyState === WebSocket.OPEN || 
+  receivePostSocket.readyState === WebSocket.CONNECTING){
   document.querySelector('#ip-connected').innerText = "IP: OK";
 }
 
-function sendCommand(type) {
+function sendCommand(cmdNumber, buttonType="default") {
   // Send the selected command to a set of devices, obtained from getDeviceReceive()
   //
   // Format of command-json that will be sent:
   // id - (int) id of the groundstation
-  // type - (int) integer that represent what this command will do (see table of commands)
+  // cmdNumber - (int) integer that represent what this command will do (see table of commands)
+  // buttonType - (string) default or checkbox
   // receiver - (int) ID of the active device on the 'select-device list'
   //            note if the command will be sent to all devices, the ID will be 'all'
 
-  jsonToSend = {id: 1, type: type}
+  jsonToSend = {id: 1, type: cmdNumber, button_type: buttonType}
   jsonToSend["receiver"] = getDeviceReceiver();
 
   jsonToSend = JSON.stringify(jsonToSend);
@@ -111,6 +116,10 @@ function notifyUiWhenJsonReceived(jsonReceived, msg) {
   p.className += "json-received";
 
   element.prepend(p);
+  if(autoScroll == true) {
+    var elem= document.getElementById('logs');
+    elem.scroll(0, 0);
+  }
 }
 
 function checkJsonType(msg) {
@@ -165,12 +174,21 @@ function checkJsonType(msg) {
   }
 }
 
-function checkAbort(checkbox) {
+function checkScroll(checkbox) {
   if(checkbox.checked) {
-    sendCommand(30);
+    autoScroll = true;
   }
   else {
-    sendCommand(31);
+    autoScroll = false;
+  }
+}
+
+function checkAbort(checkbox) {
+  if(checkbox.checked) {
+    sendCommand(30, "checkbox");
+  }
+  else {
+    sendCommand(31, "checkbox");
   }
 }
 

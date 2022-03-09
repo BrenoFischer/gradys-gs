@@ -17,7 +17,7 @@ class PostConsumer(AsyncWebsocketConsumer):
   def __init__(self) -> None:
       super().__init__()
       self.async_tasks = []
-      self.abort_all_task = None
+      self.cancel_all_task = None
 
 
   async def connect(self):
@@ -32,8 +32,8 @@ class PostConsumer(AsyncWebsocketConsumer):
     # Called when websocket connection is closed.
     for task in self.async_tasks:
       task.cancel()
-    if self.abort_all_task:
-      self.abort_all_task.cancel()
+    if self.cancel_all_task:
+      self.cancel_all_task.cancel()
     print(f'Post websocket disconnected {close_code}')
 
 
@@ -63,53 +63,69 @@ class PostConsumer(AsyncWebsocketConsumer):
         response_from_device = await resp.json(content_type=None)
         print(f'Django recebeu resposta do GET request: {response_from_device}')
 
+        # Logging the GET request response and original information
         source = device_type + '-' + str(id)
         logger.log_info(source=source, data=response_from_device, code_origin='send-get-response')
+        # Updating the interface with the response
         await self.send(json.dumps(response_from_device))
 
 
-  async def keep_abort_all(self, command):
+  async def keep_cancel_all(self, command):
+    # Keep sending /rtl to all devices, to cancel all missions
     SECONDS_TO_WAIT = 4
-    # Keep sending /rtl to all devices, to abort all
+    # Get from persistant list all the registred devices
     device_to_send_list = get_device_from_list_by_id('all')
+
     while True:
       for device in device_to_send_list:
-        ip = device['ip']
+        # Get the specific command path of the endpoint address
         command_path_list = config['commands-list'][str(command)].split(',')
         endpoint = command_path_list[0]
-        url = ip + endpoint
+        url = device['ip'] + endpoint
+
+        # Create the GET request task
         task = asyncio.create_task(self.send_get_specific_device(url, device['id'], device['device']))
         self.async_tasks.append(task)
       await asyncio.sleep(SECONDS_TO_WAIT)
+
+
+  async def treat_checkbox_cmds(self, command):
+    # Auxiliary function to check and execute special command to keep the order to cancel a mission or not
+    cmd_to_keep_canceling = int(config['checkbox-commands']['keep_canceling'])
+    cmd_to_stop_canceling = int(config['checkbox-commands']['stop_canceling'])
+
+    if command == cmd_to_stop_canceling:
+      # Checkbox to cancel all missions is not checked anymore
+      if self.cancel_all_task:
+        self.cancel_all_task.cancel()
+    if command == cmd_to_keep_canceling:
+      # Checkbox to cancel all missions is checked. Creating a task to keep sending /rtl
+      self.cancel_all_task = asyncio.create_task(self.keep_cancel_all(cmd_to_keep_canceling))
 
 
   async def send_via_http(self, text_data):
     # The command received via socket will be processed 
     received_json = json.loads(text_data)
 
-    # It'll search the 'persistent device list' for available device, with matching id,
-    # Or get all persistent list if device_receiver_id is 'all'.
+    button_type = received_json['button_type']
     device_receiver_id = str(received_json['receiver'])
     command = str(received_json['type'])
+
+    # It'll search the 'persistent device list' for available device, with matching id,
+    # Or get all persistent list if device_receiver_id is 'all'.
     device_to_send_list = get_device_from_list_by_id(device_receiver_id)
 
-    if int(command) == 31:
-      # Checkbox is not checked anymore, abort all is canceled
-      if self.abort_all_task:
-        self.abort_all_task.cancel()
-    if int(command) == 30:
-      # Checkbox is checked, abort all is running. Creating a task to keep sending /rtl
-      self.abort_all_task = asyncio.create_task(self.keep_abort_all(30))
-
-    if int(command) != 31 and int(command) != 30:
+    # Checkbox commands are treat differently
+    if button_type == "checkbox":
+      await self.treat_checkbox_cmds(int(command))
+    else:
       for device in device_to_send_list:
         ip = device['ip']
         id = str(device['id'])
-        print(f'Type recebido: {command}')
         command_path_list = config['commands-list'][command].split(',')
         endpoint = command_path_list[0]
         url = ip + endpoint
-        # Json_to_send will have the correct ID in the 'id' field
+        # Json_to_send will have the correct id in the 'id' field
         json_to_send = replicate_dict_new_id(id, received_json)
         # Insert device_type in json_to_send
         json_to_send['device'] = device['device']
@@ -137,6 +153,7 @@ class PostConsumer(AsyncWebsocketConsumer):
     append_device_to_persistant_list(data)
 
     source = data['device'] + '-' + str(data['id'])
+    print(f"Type recebido: {data['type']}")
     logger.log_info(source=source, data=data, code_origin='receive-info')
     try:
       await self.send(json.dumps(data)) # Send to JS via socket

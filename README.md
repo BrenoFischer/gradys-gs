@@ -47,7 +47,7 @@ gradys-gs$ source venv/bin/activate
 If you need more information about virtual environments with python, it [can be found here](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment).
 
 ## Installing necessary packages
-The list of necessary packages are inside requeriments.txt file. It'll be installed automatically, using the Python package manager, pip. You can install, running on Windows console:
+The list of necessary packages are inside requeriments.txt file, if you are using Windows. It'll be installed automatically, using the Python package manager, pip. You can install, running on Windows console:
 ```console
 Windows
 C:\path-to-this-cloned-repository\> pip3 install -r requeriments.txt
@@ -93,7 +93,8 @@ C:\path-to-this-cloned-repository\> python3 manage.py runserver 0.0.0.0:8000
 Remember to insert, inside config.ini file, the correct IP + Port, on [post] category, if changed to a specific IP, when running the command above.
 
 ## Connecting to home page
-You should be able to connect to the home page now, acessing, on your browser, the IP/PORT the server is up, on default: localhost:8000.
+Now you should be able to connect to the home page, acessing, on your browser, the IP/PORT the server is up, on default: localhost:8000.
+
 
 
 # Project Architecture and customization
@@ -104,14 +105,14 @@ Both modules comunicate with each other via WebSocket channels. A socket connect
 
 The main project architecture are represented with the two main modules, front-end and back-end. They communicate with each other after establishing a websocket connection, exchanging JSONs. The submodule, containing javascript files, start the socket connection with a route stated inside Django Channels submodule.
 <br>
-The information gate of the ground station is through Connections submodule, which constains the routes and logic to receive/send information.  
+The information gate of the ground station to external devices is through Connections submodule, which constains the routes and logic to receive/send information.
 
 
 ## Django
 
 ### URL/View
 
-To understand the server-side struct of this project, first it's required a basic understanding of how Django is structured and how it operates.
+To understand the server-side structure of this project, first it's required a basic understanding of how Django is structured and how it operates.
 Building a URL scheme with Django is a simple task, thanks to the URL/View mapping that the python web framework provides.
 When a user requests a page from the URL schema, Django does a mapping to the corresponding Python function, that's called *View*.</br>
 So, for example, the URL scheme below has a mapping between the **home page** path and **index** view, also between ***/command/*** path (note that 'command' is a simple integer) and **receive_command_test** view.
@@ -166,7 +167,7 @@ So, when our Javascript is loaded, it tries to connect with a specific Consumer,
 // Javascript stablishing new connection
 var socket = new WebSocket('ws://localhost:8000/ws/connection/');
 ```
-When this command is read, the ConnectionConsumer is called and a connection is initated.
+When this command is read, the ConnectionConsumer class is called and a connection is initated.
 Our Consumers are inside ***connections/consumers_wrappers/*** and a new one can be created, inheriting WebsocketConsumer or AsyncWebsocketConsumer, depending on it's functionality. You can substitute three main methods:
 <!--ts-->
 * **connect**: called when the specific url is accessed and start a dedicated connection with self.accept. This is the only method you NEED to override.
@@ -204,7 +205,7 @@ ws_urlpatterns = [
 Finnaly, accessing ws://localhost:8000/ws/new-socket/, a dedicated full-duplex connection should be stablished and our two ends can communicate with each other.
 
 ## Front-end
-Our front-end consists in templates files, CSS styling files and Javascript files.
+Our front-end consists of templates files, CSS styling files and Javascript files.
 The home page template file is rendered when the default ip+port is accessed, as showed above. New templates files can be added inside the **/templates/** folder. They work very similarly to HTML files, with some add-ons. 
 ```html
 {% load static %}
@@ -247,6 +248,23 @@ socket.onmessage = function(msg) {
 ```
 <!--te-->
 
+## Sequence Diagram
+The sequence message diagram below represents the messages flow between external devices and the main modules from this framework.
+
+![Project Architecture](/readme_images/sequenceDiagram.png)
+
+Note that the message protocol between the framework and external devices can differ from project to project, changing the way the information is delivered or the commands are handled. But, the messages flow between the back-end and front-end modules should remain similar to this diagram.
+</br>
+Important things to notice are:
+<!--ts-->
+* When a device send information to the framework, the back-end will **register** this device, if not already on the persistant list, log the information and forward to front-end, to update the interface.
+
+* There is a Consumer in charge to keep the persistant device list, with the registred devices, inside ***/connections/consumers_wrapper/update_periodically.py***. In this Consumer, there is a task to update the activity status of the devices on the list, every X seconds, specified at *config.ini*. This is represented on the third group of messages flow in the diagram above.
+
+* There is the possibility to create checkbox buttons, that will trigger a constant task, while the checkbox is pressed. This is represented on the fourth group of messages flow in the sequence diagram.
+<!--te-->
+
+
 ## Command Buttons
 Another important functionality in this framework is the possibility to send commands, through the interface, to available devices.
 We can register a new button inside the template, create a onClick callback function and send the command via websocket to Django (back-end).
@@ -282,7 +300,7 @@ You already have a button on interface that sends a command, in this case '40', 
 </br>
 Inside the <i>'receive'</i> method of this Consumer's Class, it's up to you to write the command's logic, according to your communication protocol.
 </br>
-When handling with HTTP requests, you can insert the new command to  the command's list, inside config.ini file. The Consumer can iterate this list and check the command received, mapping to the right endpoint.
+When handling with **HTTP requests**, you can insert the new command to  the command's list, inside config.ini file. The Consumer can iterate this list and check the command received, mapping to the right endpoint.
 ```javascript
 [commands-list]
 20 = position_absolute_json,get

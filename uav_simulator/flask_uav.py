@@ -102,7 +102,6 @@ parser.add_argument(
 parser.add_argument(
     '--uav_ip',
     dest='uav_ip',
-    default='0.0.0.0',
     help="IP to run the flask server",  
 )
 
@@ -1610,6 +1609,9 @@ def create_app():
 
     @app.route('/auto')
     def flask_auto():
+        # Mudar para sample
+        # Criar uma nova /auto
+        # Criar uma nova /experiment
         global copter
         print("Let's wait ready to arm")
         # We wait that can pass all arming check
@@ -1705,6 +1707,8 @@ def create_app():
         with dataLock:
             #sample print('Safe print regardless race condition...')
             global copter
+
+            # Reading the config file 
             config_from_django = configparser.ConfigParser()
             config_from_django.read('../config.ini')
             # The groundstation address this uav will send information 
@@ -1712,29 +1716,39 @@ def create_app():
             targetpos = copter.mav.location(relative_alt=True)
             uav_id = int(args.uav_sysid)
             
+            # The real time coordinates of the UAV
             json_tmp = {"id": uav_id, "lat": str(targetpos.lat), "lng": str(targetpos.lng), "alt": str(targetpos.alt)}
+            # The device type
             json_tmp['device'] = 'uav'
-            json_tmp['type'] = 102
+            # The type of message, in this case it represents location info message
+            json_tmp['type'] = 102 
+            # The sequential number to check package loss
             json_tmp['seq'] = seq
             seq += 1
+
             # The IP:Port of this uav
             #ipv4 = os.popen('ip addr show eth0').read().split("inet ")[1].split("/")[0]
-            if (str(args.uav_ip)):
-                json_tmp['ip'] = str(args.uav_ip) + ':' + flask_port + '/'
+
+            if (args.uav_ip is None):
+                # In case there wasn't provided the UAV IP, the thread will stop and the instructions will show on terminal. 
+                print('\nNão foi informado o IP desse UAV...\nInsira o endereço no comando de linha utilizando a variável a seguir:')
+                print('--uav_ip http://IP')
+                print('\nPressione CTRL+C para encerrar.')
             else:
-                json_tmp['ip'] = config_from_django['uav-simulator']['uav_url'] + ':' + flask_port + '/'
+                # This UAV address, so the GS can register and send specific commands back
+                json_tmp['ip'] = str(args.uav_ip) + ':' + flask_port + '/'
 
-            try:
-                r = requests.post(path_to_post, data=json_tmp)
-                print(r.status_code, r.reason)
-                logger.log_info(r, f'uav-sim{uav_id}')
-            except:
-                print('Error when sending information. Logging...')
-                logger.log_except()
+                try:
+                    r = requests.post(path_to_post, data=json_tmp)
+                    print(r.status_code, r.reason)
+                    logger.log_info(r, f'uav-sim{uav_id}')
+                except:
+                    print('Erro ao enviar a informação. Logging...')
+                    logger.log_except()
 
-        # Set the next thread to happen
-        yourThread = threading.Timer(POOL_TIME, doStuff, ())
-        yourThread.start()
+                # Set the next thread to happen
+                yourThread = threading.Timer(POOL_TIME, doStuff, ())
+                yourThread.start()
 
 
     def doStuffStart():

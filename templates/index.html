@@ -14,6 +14,13 @@
         <div id="map"></div>
       </div>
       <div class="section-container command-buttons">
+        <div class="buttons-set-container">
+          <p>Configuration</p>
+          <div class="checkbox-container">
+            <input type="checkbox" name="scroll-checkbox" onclick="checkScroll(this)" class="custom-checkbox" checked />
+            <label>Auto Scroll</label>
+          </div>
+        </div>
         <div class="select-container">
           <p>Select the device</p>
           <select id="select-device">
@@ -31,8 +38,10 @@
           <input class="button" id="run-experiment" type="button" value="Run Experiment">
           <input class="button" id="set-auto" type="button" value="Set Auto">
           <div>
-            <input type="checkbox" name="abort-all-checkbox" onclick="checkAbort(this)" />
-            <span>Abort All</span>
+            <div class="checkbox-container">
+              <input type="checkbox" name="abort-all-checkbox" onclick="checkAbort(this)" class="custom-checkbox"/>
+              <label>Abort All</label>
+            </div>
           </div>
         </div>
         <div class="buttons-set-container">
@@ -40,7 +49,7 @@
           <input class="button" id="takeoff-and-hold" type="button" value="Takeoff and Hold">
         </div>
       </div>
-      <div class="section-container log">
+      <div class="section-container log" id="logs">
         <div id="actions-logs"></div>
       </div>
       <div class="section-container connection-status">
