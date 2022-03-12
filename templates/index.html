@@ -9,18 +9,11 @@
   <script src="{% static 'connections/js/gmap.js' %}"></script>
 </head>
   <body>
-    <div class="page-container">
+    <div class="page-container grid-template-area">
       <div class="section-container map-container">
         <div id="map"></div>
       </div>
       <div class="section-container command-buttons">
-        <div class="buttons-set-container">
-          <p>Configuration</p>
-          <div class="checkbox-container">
-            <input type="checkbox" name="scroll-checkbox" onclick="checkScroll(this)" class="custom-checkbox" checked />
-            <label>Auto Scroll</label>
-          </div>
-        </div>
         <div class="select-container">
           <p>Select the device</p>
           <select id="select-device">
@@ -48,13 +41,20 @@
           <p>Flight Commands</p>
           <input class="button" id="takeoff-and-hold" type="button" value="Takeoff and Hold">
         </div>
+        <div class="buttons-set-container">
+          <p>Configuration</p>
+          <div class="checkbox-container">
+            <input type="checkbox" name="scroll-checkbox" onclick="checkScroll(this)" class="custom-checkbox" checked />
+            <label>Auto Scroll</label>
+          </div>
+        </div>
+        <div class="connection-status">
+          <div id="ip-connected"></div>
+          <div id="ip-disconnected"></div>
+        </div>
       </div>
       <div class="section-container log" id="logs">
         <div id="actions-logs"></div>
-      </div>
-      <div class="section-container connection-status">
-        <div id="ip-connected"></div>
-        <div id="ip-disconnected"></div>
       </div>
     </div>
 

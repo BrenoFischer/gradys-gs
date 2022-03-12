@@ -28,8 +28,19 @@ html, body {
   grid-template-rows: 1.5fr 0.5fr;
 }
 
+.grid-template-area {
+  grid-template-areas:
+  "map btns"
+  "log btns"
+  ;
+}
+
 #map {
   height: 100%;
+}
+
+.map-container {
+  grid-area: map;
 }
 
 .section-container {
@@ -38,6 +49,7 @@ html, body {
 
 .command-buttons {
   overflow-y: scroll;
+  grid-area: btns;
 }
 
 .command-buttons::-webkit-scrollbar {
@@ -108,6 +120,7 @@ html, body {
 .log {
   font-size: 18px;
   overflow-y: auto;
+  grid-area: log;
 }
 
 #actions-logs {
@@ -125,6 +138,7 @@ html, body {
 }
 
 .connection-status {
+  margin-top: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
