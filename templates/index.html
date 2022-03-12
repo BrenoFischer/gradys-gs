@@ -32,8 +32,8 @@
           <input class="button" id="set-auto" type="button" value="Set Auto">
           <div>
             <div class="checkbox-container">
-              <input type="checkbox" name="abort-all-checkbox" onclick="checkAbort(this)" class="custom-checkbox"/>
-              <label>Abort All</label>
+              <input type="checkbox" name="abort-all-checkbox" id="abort-all" onclick="checkAbort(this)" class="custom-checkbox"/>
+              <label for="abort-all" class="label">Abort All</label>
             </div>
           </div>
         </div>
@@ -44,8 +44,8 @@
         <div class="buttons-set-container">
           <p>Configuration</p>
           <div class="checkbox-container">
-            <input type="checkbox" name="scroll-checkbox" onclick="checkScroll(this)" class="custom-checkbox" checked />
-            <label>Auto Scroll</label>
+            <input type="checkbox" name="scroll-checkbox" id="scroll" onclick="checkScroll(this)" class="custom-checkbox" checked />
+            <label for="scroll" class="label">Auto Scroll</label>
           </div>
         </div>
         <div class="connection-status">
