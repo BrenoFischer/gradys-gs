@@ -89,6 +89,12 @@ parser.add_argument(
     dest='uav_ip',
     help="IP to run the flask server",  
 )
+parser.add_argument(
+    '--text_path',
+    dest='text_path',
+    default='',
+    help="Value for the path to a text file to be opened.",  
+)
 
 args = parser.parse_args()
 
@@ -249,6 +255,19 @@ def create_app():
         print(json_tmp)
         #print(json
         return json_tmp
+
+    @app.route('/read_text_file')
+    @app.route('/read_text_file/<path>')
+    def flask_read_text_file(path=''):
+        if path != '':
+            try:
+                f = open(path, 'r')
+                file_content = f.read()
+                print(file_content)
+                f.close()
+            except:
+                print('Error manipulationg text file. Logging...')
+                logger.log_except()
     ##########################################################################
 
 
@@ -311,6 +330,9 @@ def create_app():
 
     # Initiate
     sendLocationStart()
+    # Read text file
+    if args.text_path != '':
+        flask_read_text_file(args.text_path)
     # When you kill Flask (SIGTERM), clear the trigger for the next thread
     atexit.register(interrupt)
     return app

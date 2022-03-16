@@ -27,8 +27,11 @@ s.connect(("8.8.8.8", 80))
 ip = s.getsockname()[0]
 
 # Run uav flask servers 
+text_path = config['uav-simulator']['text_file_path']
 for i in range(uav_qt):
-    cmd_line = f'python3 flask_uav.py --uav_sysid 2{i+1} --uav_udp_port 1717{i+1} --uav_ip http://{ip} &'
+    cmd_line = f'python3 flask_uav.py --uav_sysid 2{i+1} --uav_udp_port 1717{i+1} --uav_ip http://{ip}'
+    if text_path != '':
+        cmd_line +=  f' --text_path {text_path}'
     os.system(cmd_line)
     time.sleep(delay)
 
