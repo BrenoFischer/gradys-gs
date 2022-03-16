@@ -13,7 +13,7 @@ var autoScroll = true;
 // Set the interface status to connected, if POST socket is Open
 if(receivePostSocket.readyState === WebSocket.OPEN || 
   receivePostSocket.readyState === WebSocket.CONNECTING){
-  document.querySelector('#ip-connected').innerText = "IP: OK";
+  document.querySelector('#ip-connected').innerText = "Background: Online";
 }
 
 function sendCommand(cmdNumber, buttonType="default") {
@@ -217,7 +217,7 @@ sendCommandSocket.onclose = function(e) {
 
 receivePostSocket.onclose = function(e) {
   document.querySelector('#ip-connected').innerText = "";
-  document.querySelector('#ip-disconnected').innerText = 'IP: OFF';
+  document.querySelector('#ip-disconnected').innerText = 'Background: Offline';
   console.error('Receive POST socket closed unexpectedly');
 }
 

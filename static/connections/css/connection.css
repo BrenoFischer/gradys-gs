@@ -135,7 +135,9 @@ html, body {
 }
 
 .connection-status {
-  margin-top: 20px;
+  margin: 20px 10% 20px 10%;
+  padding: 30px;
+  border: solid 3px var(--white-color);
   display: flex;
   align-items: center;
   justify-content: center;
