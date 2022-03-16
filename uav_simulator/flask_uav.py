@@ -102,7 +102,7 @@ __license__ = "GPLv3}"
 POOL_TIME = 1 #Seconds
 
 # variables that are accessible from anywhere
-commonDataStruct = {}
+#commonDataStruct = {}
 # lock to control access to variable
 dataLock = threading.Lock()
 # thread handler
@@ -256,17 +256,14 @@ def create_app():
         global yourThread
         yourThread.cancel()
 
-    def doStuff():
-        global commonDataStruct
+    def sendLocation():
         global yourThread
         global seq
+        global config_from_django
         with dataLock:
             #sample print('Safe print regardless race condition...')
             global copter
 
-            # Reading the config file 
-            config_from_django = configparser.ConfigParser()
-            config_from_django.read('../config.ini')
             # The groundstation address this uav will send information 
             path_to_post = config_from_django['post']['ip'] + config_from_django['post']['path_receive_info']
             targetpos = copter.mav.location(relative_alt=True)
@@ -277,17 +274,14 @@ def create_app():
             # The device type
             json_tmp['device'] = 'uav'
             # The type of message, in this case it represents location info message
-            json_tmp['type'] = 102 
+            json_tmp['type'] = config_from_django["internal-protocol"]["location_command"] 
             # The sequential number to check package loss
             json_tmp['seq'] = seq
             seq += 1
 
-            # The IP:Port of this uav
-            #ipv4 = os.popen('ip addr show eth0').read().split("inet ")[1].split("/")[0]
-
             if (args.uav_ip is None):
                 # In case there wasn't provided the UAV IP, the thread will stop and the instructions will show on terminal. 
-                print('\nNão foi informado o IP desse UAV...\nInsira o endereço no comando de linha utilizando a variável a seguir:')
+                print('\nNão foi informado o IP desse UAV...\nVerifique a execução do comando em /uav_simulator/run_uav.py:')
                 print('--uav_ip http://IP')
                 print('\nPressione CTRL+C para encerrar.')
             else:
@@ -303,20 +297,20 @@ def create_app():
                     logger.log_except()
 
                 # Set the next thread to happen
-                yourThread = threading.Timer(POOL_TIME, doStuff, ())
+                yourThread = threading.Timer(POOL_TIME, sendLocation, ())
                 yourThread.start()
 
 
-    def doStuffStart():
+    def sendLocationStart():
         # Do initialisation stuff here
         print('Creating intermediary scheduler...')
         global yourThread
         # Create your thread
-        yourThread = threading.Timer(POOL_TIME, doStuff, ())
+        yourThread = threading.Timer(POOL_TIME, sendLocation, ())
         yourThread.start()
 
     # Initiate
-    doStuffStart()
+    sendLocationStart()
     # When you kill Flask (SIGTERM), clear the trigger for the next thread
     atexit.register(interrupt)
     return app
@@ -330,6 +324,9 @@ if (args.uav_sysid == -1) or (args.uav_udp_port == -1):
     sys.exit(1)
 
 logger = Logger()
+# Reading the config file 
+config_from_django = configparser.ConfigParser()
+config_from_django.read('../config.ini')
 
 print("Running MAIN!!!")
 copter = Copter(sysid=int(args.uav_sysid))
