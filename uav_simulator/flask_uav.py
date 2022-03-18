@@ -53,7 +53,11 @@ import requests
 
 # Import from inside project
 from utils.logger import Logger
-from copter import Copter
+# from copter import Copter
+from copter_factory import get_copter_instance
+from args_manager import register_args
+from blueprints.experiments import experiments_blueprint
+from blueprints.position import position_blueprint
 
 
 from flask import Flask
@@ -97,6 +101,7 @@ parser.add_argument(
 )
 
 args = parser.parse_args()
+register_args(args)
 
 __license__ = "GPLv3}"
 
@@ -134,13 +139,13 @@ def create_app():
     def hello(name=None):
         return render_template('return.html', name=name)    
 
-    @app.route('/connect')
-    def flask_connect():
-        global copter
-        copter = Copter(sysid=int(config['master']['sysid']))
-        # Assume that we are connecting to SITL on udp 14550
-        copter.connect(connection_string=str(config['master']['connection_string']))
-        return render_template('return.html', name='connected')  
+    # @app.route('/connect')
+    # def flask_connect():
+    #     global copter
+    #     copter = Copter(sysid=int(config['master']['sysid']))
+    #     # Assume that we are connecting to SITL on udp 14550
+    #     copter.connect(connection_string=str(config['master']['connection_string']))
+    #     return render_template('return.html', name='connected')  
 
     @app.route('/arm')
     def flask_arm():
@@ -167,94 +172,8 @@ def create_app():
     def flask_rtl():
         global copter
         copter.do_RTL()
-        return render_template('return.html', name='Ordered to takeoff to RTL')    
+        return render_template('return.html', name='Ordered to takeoff to RTL') 
 
-    @app.route('/auto')
-    def flask_auto():
-        # Mudar para sample
-        # Criar uma nova /auto
-        # Criar uma nova /experiment
-        global copter
-        print("Let's wait ready to arm")
-        # We wait that can pass all arming check
-        copter.wait_ready_to_arm()
-
-        print("Let's create and write a mission")
-        # We will write manually a mission by defining some waypoint
-        # We start by initialising mavwp helper library
-        copter.init_wp()
-        # We get the home position to serve as reference for the mission and as waypoint 0.
-        last_home = copter.home_position_as_mav_location()
-        # On Copter, we need a takeoff ... for takeoff !
-        copter.add_wp_takeoff(last_home.lat, last_home.lng, 10)
-        copter.add_waypoint(last_home.lat + 0.005, last_home.lng + 0.005, 20)
-        copter.add_waypoint(last_home.lat - 0.005, last_home.lng + 0.005, 30)
-        copter.add_waypoint(last_home.lat - 0.005, last_home.lng - 0.005, 20)
-        copter.add_waypoint(last_home.lat + 0.005, last_home.lng - 0.005, 15)
-        # We add a RTL at the end.
-        copter.add_wp_rtl()
-        # We send everything to the drone
-        copter.send_all_waypoints()
-
-        print("Let's get the mission written")
-        # We get the number of mission waypoint in the drone and print the mission
-        wp_count = copter.get_all_waypoints()
-
-        print("Let's execute the mission")
-        # On ArduPilot, with copter < 4.1 we need to arm before going into Auto mode.
-        # We use GUIDED mode as the requirement are closed to AUTO one's
-        copter.change_mode("GUIDED")
-        # We wait that can pass all arming check
-        copter.wait_ready_to_arm()
-        copter.arm_vehicle()
-        # When armed, we change mode to AUTO
-        copter.change_mode("AUTO")
-        # As we don't have RC radio here, we trigger mission start with MAVLink.
-        copter.send_cmd(mavutil.mavlink.MAV_CMD_MISSION_START,
-                        1,  # ARM
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        target_sysid=copter.target_system,
-                        target_compid=copter.target_system,
-                        )
-        # We use the convenient function to track the mission progression
-        copter.wait_waypoint(0, wp_count - 1, timeout=500)
-        copter.wait_landed_and_disarmed(min_alt=2)
-
-        return render_template('return.html', name='Ordered to do a full auto mission.')    
-
-    @app.route('/position')
-    def flask_position():
-        global copter
-        targetpos = copter.mav.location(relative_alt=True)
-        json_tmp = '{"id": ' + str(args.uav_sysid) + ', "lat":' + str(targetpos.lat) + ', "lng": ' + str(targetpos.lng) + ', "high": ' + str(targetpos.alt) + '}'
-        return render_template('return.html', name=json_tmp)    
-
-
-    @app.route('/position_relative_json')
-    def flask_position_json():
-        global copter
-        targetpos = copter.mav.location(relative_alt=True)
-        json_tmp = '{"id": ' + str(args.uav_sysid) + ',"lat": ' + str(targetpos.lat) + ',"lng": ' + str(targetpos.lng) + ',"alt":' + str(targetpos.alt) + '}'
-        #return json.dumps(json_tmp)
-        #print(json_tmp)
-        #print(json
-        return json_tmp
-
-
-    @app.route('/position_absolute_json')
-    def flask_position_relative_json():
-        global copter
-        targetpos = copter.mav.location(relative_alt=False)
-        json_tmp = '{"id": ' + str(args.uav_sysid) + ',"lat": ' + str(targetpos.lat) + ',"lng": ' + str(targetpos.lng) + ',"alt":' + str(targetpos.alt) + '}'
-        #return json.dumps(json_tmp)
-        print(json_tmp)
-        #print(json
-        return json_tmp
 
     @app.route('/read_text_file')
     @app.route('/read_text_file/<path>')
@@ -268,6 +187,9 @@ def create_app():
             except:
                 print('Error manipulationg text file. Logging...')
                 logger.log_except()
+
+    app.register_blueprint(experiments_blueprint)
+    app.register_blueprint(position_blueprint)
     ##########################################################################
 
 
@@ -339,20 +261,19 @@ def create_app():
 
 #----------------------------------------------------------------------
 
-#if __name__ == '__main__':
-
 if (args.uav_sysid == -1) or (args.uav_udp_port == -1):
     print("Bad parameters. Check uav_sysid and uav_udp_port")
     sys.exit(1)
 
 logger = Logger()
-# Reading the config file 
+# Reading the config.ini file 
 config_from_django = configparser.ConfigParser()
 config_from_django.read('../config.ini')
 
 print("Running MAIN!!!")
-copter = Copter(sysid=int(args.uav_sysid))
-copter.connect(connection_string=str("udpin:127.0.0.1:" + str(args.uav_udp_port)))
+copter = get_copter_instance(args)
+# copter = Copter(sysid=int(args.uav_sysid))
+# copter.connect(connection_string=str("udpin:127.0.0.1:" + str(args.uav_udp_port)))
 
 
 # to enable a task for pooling GS with its position
