@@ -1,6 +1,11 @@
 from flask import Blueprint, render_template
-from copter_factory import get_copter_instance
+from copter_connection import get_copter_instance
 from args_manager import get_args
+
+# Dividir blueprints em:
+# enviar comandos aos drone
+# pedir dados ao drone
+# dadca
 
 position_blueprint = Blueprint("position_blueprint", __name__, template_folder="../templates")
 

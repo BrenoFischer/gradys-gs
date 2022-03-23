@@ -1,7 +1,7 @@
 from pymavlink import mavutil
 from flask import Blueprint, render_template
 
-from copter_factory import get_copter_instance
+from copter_connection import get_copter_instance
 
 experiments_blueprint = Blueprint("experiments_blueprint", __name__, template_folder="../templates")
 

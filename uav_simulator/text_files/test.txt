@@ -1,7 +1,0 @@
-############
-Text file to test the flask route to open and read text files.
-############
-
-ABCDEFGHIJKLMNOPQRSTUVWXYZ
-abcdefghijklmnopqrstuvwxyz
-*!@#$%¨&)(*)
