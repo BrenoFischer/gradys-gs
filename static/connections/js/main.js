@@ -1,8 +1,15 @@
+// The IP+Port of the server is imported from config.ini. Django passes it as parameter to index.html, when it's rendered.
+// The IP+Port format is http://ip:port/
+// Striping the IP and Port:
+const serverIpPort = serverAddress.split(/http:\/\//)[1].split(':');
+const serverIp = serverIpPort[0];
+const serverPort = serverIpPort[1].slice(0, -1);
+
 // Starting websocket connections
-var observableSocket = new WebSocket('ws://localhost:8000/ws/connection/');
-var sendCommandSocket = new WebSocket('ws://localhost:8000/ws/receive/');
-var receivePostSocket = new WebSocket('ws://localhost:8000/ws/update-info/');
-var updateSocket = new WebSocket('ws://localhost:8000/ws/update-periodically/');
+var observableSocket = new WebSocket(`ws://${serverIp}:${serverPort}/ws/connection/`);
+var sendCommandSocket = new WebSocket(`ws://${serverIp}:${serverPort}/ws/receive/`);
+var receivePostSocket = new WebSocket(`ws://${serverIp}:${serverPort}/ws/update-info/`);
+var updateSocket = new WebSocket(`ws://${serverIp}:${serverPort}/ws/update-periodically/`);
 
 // List of active devices that'll show at 'select' field
 var activeDevicesId = []
@@ -10,11 +17,15 @@ var activeDevicesId = []
 // Control if the log text autoscroll is available or not
 var autoScroll = true;
 
-// Set the interface status to connected, if POST socket is Open
-if(receivePostSocket.readyState === WebSocket.OPEN || 
-  receivePostSocket.readyState === WebSocket.CONNECTING){
-  document.querySelector('#ip-connected').innerText = "Background: Online";
+if(receivePostSocket.readyState === WebSocket.CONNECTING){
+  document.querySelector('#ip-connected').innerText = "Background: Connecting";
 }
+
+// Set the interface status to connected, if POST socket is Open
+receivePostSocket.addEventListener('open', function (event) {
+  document.querySelector('#ip-connected').innerText = "Background: Online";
+});
+
 
 function sendCommand(cmdNumber, buttonType="default") {
   // Send the selected command to a set of devices, obtained from getDeviceReceive()
@@ -262,4 +273,16 @@ document.querySelector('#set-auto').onclick = function(e) {
 
 document.querySelector('#takeoff-and-hold').onclick = function(e) {
   sendCommand(32);
+};
+
+document.querySelector('#upload').onclick = function(e) {
+  // This is the button to upload a file. It will mantain the file, sending to the correct uav via POST Request, when Submit button is pressed
+  // This button will trigger the GET Request to obtain the correct uav IP, based on the ID. The 'action' field, on form, will be replaced with the correct IP
+  // fetch(serverAddress).then(function(response) {
+  //   return response.json();
+  // }).then(function(data) {
+  //   console.log(data);
+  // }).catch(function() {
+  //   console.log("Booo");
+  // });
 };

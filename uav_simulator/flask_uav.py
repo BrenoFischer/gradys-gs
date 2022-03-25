@@ -56,8 +56,8 @@ from utils.logger import Logger
 # from copter import Copter
 from copter_connection import get_copter_instance
 from args_manager import register_args
-from blueprints.experiments import experiments_blueprint
-from blueprints.position import position_blueprint
+from blueprints.send_cmds_to_uav import send_cmds_to_uav
+from blueprints.request_data_from_uav import request_data_from_uav
 
 
 from flask import Flask
@@ -117,6 +117,7 @@ seq = 0
 
 def create_app():
     global app
+
     app = Flask(__name__)
 
 
@@ -169,8 +170,8 @@ def create_app():
         return render_template('return.html', name='Ordered to takeoff to RTL') 
 
 
-    app.register_blueprint(experiments_blueprint)
-    app.register_blueprint(position_blueprint)
+    app.register_blueprint(send_cmds_to_uav)
+    app.register_blueprint(request_data_from_uav)
     ##########################################################################
 
 

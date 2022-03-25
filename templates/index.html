@@ -41,6 +41,11 @@
           <p>Flight Commands</p>
           <input class="button" id="takeoff-and-hold" type="button" value="Takeoff and Hold">
         </div>
+        <!-- <div class="buttons-set-container">
+          <p>Manage files</p>
+          <input class="button" id="upload" type="file" value="Upload file">
+          <input type="submit" value="Submit">
+        </div> -->
         <div class="buttons-set-container">
           <p>Configuration</p>
           <div class="checkbox-container">
@@ -63,7 +68,10 @@
       async
     ></script>
   </body>
-
+  <script>
+    var serverAddress = "{{server_address}}";
+  </script>
   <script src="{% static 'connections/js/main.js' %}"></script>
+
 </body>
 </html>

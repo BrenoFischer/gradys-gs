@@ -1,11 +1,36 @@
+import os
+
 from pymavlink import mavutil
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, current_app, request
+from werkzeug.utils import secure_filename
 
 from copter_connection import get_copter_instance
 
-experiments_blueprint = Blueprint("experiments_blueprint", __name__, template_folder="../templates")
+send_cmds_to_uav = Blueprint("send_cmds_to_uav", __name__, template_folder="../templates")
 
-@experiments_blueprint.route('/sample')
+@send_cmds_to_uav.route('/upload_file', methods=['GET', 'POST'])
+def flask_upload_file():
+    UPLOAD_FOLDER = '/uav_simulator/uploads'
+    current_app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+    print('HEREEEEEEE')
+
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            print('Not a file request')
+            return render_template('return.html', name='Not file request')
+        file = request.files['file']
+        # If the user does not select a file, the browser submits an
+        # empty file without a filename.
+        if file.filename == '':
+            print('No selected file')
+            return render_template('return.html', name='No file selected')
+
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
+    return render_template('return.html', name='File uploaded')
+
+
+@send_cmds_to_uav.route('/sample')
 def flask_sample():
     copter = get_copter_instance()
     print("Let's wait ready to arm")

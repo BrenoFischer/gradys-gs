@@ -2,14 +2,9 @@ from flask import Blueprint, render_template
 from copter_connection import get_copter_instance
 from args_manager import get_args
 
-# Dividir blueprints em:
-# enviar comandos aos drone
-# pedir dados ao drone
-# dadca
+request_data_from_uav = Blueprint("request_data_from_uav", __name__, template_folder="../templates")
 
-position_blueprint = Blueprint("position_blueprint", __name__, template_folder="../templates")
-
-@position_blueprint.route('/position')
+@request_data_from_uav.route('/position')
 def flask_position():
     copter = get_copter_instance()
     args = get_args()
@@ -17,7 +12,7 @@ def flask_position():
     json_tmp = '{"id": ' + str(args.uav_sysid) + ', "lat":' + str(targetpos.lat) + ', "lng": ' + str(targetpos.lng) + ', "high": ' + str(targetpos.alt) + '}'
     return render_template('return.html', name=json_tmp)   
 
-@position_blueprint.route('/position_relative_json')
+@request_data_from_uav.route('/position_relative_json')
 def flask_position_json():
     copter = get_copter_instance()
     args = get_args()
@@ -27,7 +22,7 @@ def flask_position_json():
     return json_tmp
 
 
-@position_blueprint.route('/position_absolute_json')
+@request_data_from_uav.route('/position_absolute_json')
 def flask_position_relative_json():
     copter = get_copter_instance()
     args = get_args()

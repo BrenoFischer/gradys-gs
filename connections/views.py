@@ -7,18 +7,19 @@ from asgiref.sync import async_to_sync
 from .consumers_wrapper.post_consumers import get_post_consumer_instance
 import configparser
 
+config = configparser.ConfigParser()
+config.read('config.ini')
+
 
 def index(request):
   context = {
-    'google_maps_key': settings.GOOGLE_MAPS_API_KEY
+    'google_maps_key': settings.GOOGLE_MAPS_API_KEY,
+    'server_address': config['server']['ip']
   }
   return render(request, 'index.html', context=context)
 
 
 def create_new_dict(request_received):
-  config = configparser.ConfigParser()
-  config.read('config.ini')
-
   ip = config['post']['ip']
 
   new_dict = {}
