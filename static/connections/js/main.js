@@ -275,14 +275,27 @@ document.querySelector('#takeoff-and-hold').onclick = function(e) {
   sendCommand(32);
 };
 
+
 document.querySelector('#upload').onclick = function(e) {
   // This is the button to upload a file. It will mantain the file, sending to the correct uav via POST Request, when Submit button is pressed
   // This button will trigger the GET Request to obtain the correct uav IP, based on the ID. The 'action' field, on form, will be replaced with the correct IP
-  // fetch(serverAddress).then(function(response) {
-  //   return response.json();
-  // }).then(function(data) {
-  //   console.log(data);
-  // }).catch(function() {
-  //   console.log("Booo");
-  // });
+  const url = serverAddress + "get-uav-ip/";
+  const id = getDeviceReceiver();
+  const data = {'id': id};
+  
+  fetch(url, {
+    method:"POST",
+    credentials: 'same-origin',
+    headers:{
+      'Accept': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest',
+    },
+    body: JSON.stringify(data)
+  }).then(response => {
+    return response.json();
+  }).then(data => {
+    console.log(data);
+  }).catch(() => {
+    console.log("Error while getting uav ip");
+  });
 };

@@ -1,3 +1,5 @@
+import json
+
 from django.shortcuts import render
 from django.conf import settings
 from django.http import JsonResponse
@@ -5,6 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from asgiref.sync import async_to_sync
 
 from .consumers_wrapper.post_consumers import get_post_consumer_instance
+from .consumers_wrapper.update_periodically_consumer import get_device_from_list_by_id
 import configparser
 
 config = configparser.ConfigParser()
@@ -57,22 +60,21 @@ async def post_to_socket(request):
 
   return JsonResponse(ack)
 
-
 @csrf_exempt
-def receive_command_test(request, command):
-  # View temporária simulando um UAV como servidor web, que irá receber um comando da GS
-  ack = {"id": 1, "type": -1, "seq": 0, "lat": 0, "lng": 0, "alt": 0, "DATA": "0"}
-  
-  if request.method == 'POST':
-    device_id = int(request.POST.get('id'))
-    print(f'O device com id: {device_id} recebeu o comando {command}')
-    if command == 24:
-      ack['type'] = 25
-    if command == 26:
-      ack['type'] = 27
-    if command == 28:
-      ack['type'] = 29
-    if command == 30:
-      ack['type'] = 31
+def send_uav_ip(request):
+  # Receives a POST request with the ID of an uav
+  # Search the uav IP on the permanente devices list and send it back
 
-  return JsonResponse(ack)
+  if request.method == 'POST':
+    id = json.load(request)['id']
+  else:
+    print(f'No POST request {request.POST}')
+    id = 'all'
+  
+  device = get_device_from_list_by_id(id)
+  if id == 'all':
+    ip = config['server']['ip']
+  else:
+    ip = device['ip']
+  
+  return JsonResponse({'ip': ip})
