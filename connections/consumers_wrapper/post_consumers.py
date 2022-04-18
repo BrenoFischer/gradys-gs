@@ -153,7 +153,8 @@ class PostConsumer(AsyncWebsocketConsumer):
     append_device_to_persistant_list(data)
 
     source = data['device'] + '-' + str(data['id'])
-    print(f"Type recebido: {data['type']}")
+    if "type" in data:
+      print(f"Type recebido: {data['type']}")
     logger.log_info(source=source, data=data, code_origin='receive-info')
     try:
       await self.send(json.dumps(data)) # Send to JS via socket

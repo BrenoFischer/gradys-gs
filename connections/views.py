@@ -26,13 +26,22 @@ def create_new_dict(request_received):
   ip = config['post']['ip']
 
   new_dict = {}
-  new_dict['id'] = int(request_received.POST.get('id'))
-  new_dict['type'] = int(request_received.POST.get('type'))
-  new_dict['seq'] = int(request_received.POST.get('seq'))
-  new_dict['lat'] = float(request_received.POST.get('lat'))
-  new_dict['lng'] = float(request_received.POST.get('lng'))
-  new_dict['alt'] = float(request_received.POST.get('alt'))
-  new_dict['device'] = request_received.POST.get('device')
+  if request_received.POST.get('id') != None:
+    new_dict['id'] = int(request_received.POST.get('id'))
+  if request_received.POST.get('type') != None:
+    new_dict['type'] = int(request_received.POST.get('type'))
+  if request_received.POST.get('seq') != None:
+    new_dict['seq'] = int(request_received.POST.get('seq'))
+  if request_received.POST.get('lat') != None:
+    new_dict['lat'] = float(request_received.POST.get('lat'))
+  if request_received.POST.get('lng') != None:
+    new_dict['lng'] = float(request_received.POST.get('lng'))
+  if request_received.POST.get('alt') != None:
+    new_dict['alt'] = float(request_received.POST.get('alt'))
+  if request_received.POST.get('device') != None:
+    new_dict['device'] = request_received.POST.get('device')
+  if request_received.POST.get('data') != None:
+    new_dict['data'] = request_received.POST.get('data')
   
   if request_received.POST.get('ip') != None:
     new_dict['ip'] = request_received.POST.get('ip')
@@ -75,6 +84,6 @@ def send_uav_ip(request):
   if id == 'all':
     ip = config['server']['ip']
   else:
-    ip = device['ip']
+    ip = device[0]['ip']
   
   return JsonResponse({'ip': ip})

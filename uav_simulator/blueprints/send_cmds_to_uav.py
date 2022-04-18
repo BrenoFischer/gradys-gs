@@ -1,7 +1,7 @@
 import os
 
 from pymavlink import mavutil
-from flask import Blueprint, render_template, current_app, request
+from flask import Blueprint, render_template, current_app, request, make_response
 from werkzeug.utils import secure_filename
 
 from copter_connection import get_copter_instance
@@ -10,14 +10,14 @@ send_cmds_to_uav = Blueprint("send_cmds_to_uav", __name__, template_folder="../t
 
 @send_cmds_to_uav.route('/upload_file', methods=['GET', 'POST'])
 def flask_upload_file():
-    UPLOAD_FOLDER = '/uav_simulator/uploads'
+    UPLOAD_FOLDER = './uploads'
+    
     current_app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-    print('HEREEEEEEE')
 
     if request.method == 'POST':
         if 'file' not in request.files:
             print('Not a file request')
-            return render_template('return.html', name='Not file request')
+            return ''
         file = request.files['file']
         # If the user does not select a file, the browser submits an
         # empty file without a filename.

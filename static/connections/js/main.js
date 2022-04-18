@@ -145,7 +145,7 @@ function checkJsonType(msg) {
 
     msgUi = 'ACK: ';
     msgDefault = 'JSON unknown: ';
-    msgDrone = 'UAV info: ';
+    msgDrone = `${djangoData['device'].toUpperCase()} info: `;
 
     switch(json_type) {
       case 102: // Device information received
@@ -176,6 +176,7 @@ function checkJsonType(msg) {
 
       // The default behavior to other types not included above
       default:
+        msgDefault = djangoData.hasOwnProperty('device') ? msgDrone : msgDefault;
         notifyUiWhenJsonReceived(msg.data, msgDefault);
         break;
     }
@@ -282,6 +283,7 @@ document.querySelector('#upload').onclick = function(e) {
   const url = serverAddress + "get-uav-ip/";
   const id = getDeviceReceiver();
   const data = {'id': id};
+  let form = document.getElementById('form');
   
   fetch(url, {
     method:"POST",
@@ -294,8 +296,24 @@ document.querySelector('#upload').onclick = function(e) {
   }).then(response => {
     return response.json();
   }).then(data => {
-    console.log(data);
+    form.action = data.ip + "upload_file";
   }).catch(() => {
     console.log("Error while getting uav ip");
   });
 };
+
+
+var form = document.querySelector("form");
+form.addEventListener('submit', (e) => {
+  let data = new FormData();
+  let fileInput = document.getElementById('upload');
+  data.append("file", fileInput.files[0]);
+
+  let request = new XMLHttpRequest();
+  let url = form.action;
+
+  request.open("POST", url, true);
+  
+  request.send(data);
+  e.preventDefault();
+});

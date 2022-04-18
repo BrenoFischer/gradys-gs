@@ -18,6 +18,8 @@ uav_simulator/terrain/*
 uav_simulator/logs/*
 uav_simulator/LOGS_sim/exceptions/*
 uav_simulator/LOGS_sim/info/*
+uav_simulator/uploads/*
+!uav_simulator/uploads/.gitkeep
 terrain/*
 logs/*
 *.bin

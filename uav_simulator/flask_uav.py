@@ -64,6 +64,7 @@ from flask import Flask
 from flask import render_template
 from flask import jsonify #returns a json from a dict
 from flask import json
+from flask_cors import CORS
 #app = Flask(__name__)
 
 #######
@@ -111,7 +112,8 @@ POOL_TIME = 1 #Seconds
 # lock to control access to variable
 dataLock = threading.Lock()
 # thread handler
-yourThread = threading.Thread()
+droneThread = threading.Thread()
+
 # simple sequential int to check package loss
 seq = 0
 
@@ -119,6 +121,7 @@ def create_app():
     global app
 
     app = Flask(__name__)
+    CORS(app)
 
 
     ##########################################################################
@@ -176,11 +179,11 @@ def create_app():
 
 
     def interrupt():
-        global yourThread
-        yourThread.cancel()
+        global droneThread
+        droneThread.cancel()
 
     def sendLocation():
-        global yourThread
+        global droneThread
         global seq
         global config_from_django
         with dataLock:
@@ -220,17 +223,14 @@ def create_app():
                     logger.log_except()
 
                 # Set the next thread to happen
-                yourThread = threading.Timer(POOL_TIME, sendLocation, ())
-                yourThread.start()
-
+                droneThread = threading.Timer(POOL_TIME, sendLocation, ())
+                droneThread.start()
 
     def sendLocationStart():
-        # Do initialisation stuff here
-        print('Creating intermediary scheduler...')
-        global yourThread
-        # Create your thread
-        yourThread = threading.Timer(POOL_TIME, sendLocation, ())
-        yourThread.start()
+        global droneThread
+        droneThread = threading.Timer(POOL_TIME, sendLocation, ())
+        droneThread.start()
+
 
     # Initiate
     sendLocationStart()
