@@ -45,15 +45,15 @@
           <form method="post" action="" enctype="multipart/form-data" id="form">
             <div class="buttons-set-container">
               <p>Manage files</p>
-              <label for="upload" class="custom-upload">
-                <span class="material-symbols-outlined">
+              <label for="upload" class="custom-upload" id="custom-input-label">
+                <span class="material-symbols-outlined" id="input-icon">
                   upload_file
                 </span>
                 Upload file
               </label>
               <input id="upload" type="file">
-              <label for="submit-file" class="custom-submit-file">Submit file</label>
-              <input type="submit" id="submit-file">
+              <label for="submit-file" class="custom-submit-file-disabled" id="submit-label">Submit file</label>
+              <input type="submit" id="submit-file" disabled>
           </form>
         </div>
         <div class="buttons-set-container">

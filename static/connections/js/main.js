@@ -317,3 +317,23 @@ form.addEventListener('submit', (e) => {
   request.send(data);
   e.preventDefault();
 });
+
+var inputBtn = document.getElementById("upload");
+inputBtn.addEventListener('input', () => {
+  let submitBtn = document.getElementById("submit-file");
+  let submitLabel = document.getElementById("submit-label");
+  let inputIcon = document.getElementById("input-icon");
+  let primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color');
+  let darkGrayColor = getComputedStyle(document.documentElement).getPropertyValue('--dark-gray-color');
+
+  if(inputBtn.files.length != 0) {
+    submitBtn.disabled = false;
+    submitLabel.className = "custom-submit-file";
+    inputIcon.style.color = primaryColor;
+  }
+  else {
+    submitBtn.disabled = true;
+    submitLabel.className = "custom-submit-file-disabled";
+    inputIcon.style.color = darkGrayColor;
+  }
+});

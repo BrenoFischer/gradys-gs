@@ -3,6 +3,7 @@
   --white-color: #ece8e1;
   --green-color: #46ff7e;
   --light-gray-color: #eee;
+  --dark-gray-color: #424242;
   --background-color: #0f1923;
   --border-color: #424242;
   --border-width: 2px;
@@ -141,7 +142,7 @@ input[type~="submit"] {
 }
 
 .custom-upload span {
-  color: var(--primary-color);
+  color: var(--dark-gray-color);
   position: absolute;
   left: 4%;
 }
@@ -176,6 +177,22 @@ input[type~="submit"] {
   height: 40px;
   padding: 8px;
   border: 3px solid var(--white-color);
+  box-shadow: inset 0 0 0 0 var(--primary-color);
+  transition: 100ms linear;
+}
+
+.custom-submit-file-disabled {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  margin-top: 10px;
+  background: var(--background-color);
+  color: var(--dark-gray-color);
+  width: 16vw;
+  height: 40px;
+  padding: 8px;
+  border: 3px solid var(--dark-gray-color);
   box-shadow: inset 0 0 0 0 var(--primary-color);
   transition: 100ms linear;
 }
