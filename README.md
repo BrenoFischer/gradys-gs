@@ -248,6 +248,97 @@ socket.onmessage = function(msg) {
 ```
 <!--te-->
 
+## External Communication
+The primary purpose of this framework is to exchange information with other devices. Currently, there are implemented two ways for external connections.
+
+The first way is to plugin an ESP32 microcontroller to the framework's machine. This microcontroller should be able to detect other devices that receive and send information to them. Our framework can establish a UART connection with a plugged ESP32 microcontroller, receive everything sent via serial, and send commands via serial, making the microcontroller responsible for retransmitting the command. In order to accept a connection with an ESP32 microcontroller, it is necessary to insert the correct UART Port and baud rate inside config.ini. The SerialConnection class, from /connections/serial_connector.py, is instantiated when javascript starts a WebSocket connection of this type. The instantiated object keeps trying connection with the UART Port. Once a microcontroller is plugged in, the interface indicates this change, and you can exchange information through the ESP32 microcontroller.
+
+Another way to communicate with our framework is with POST requests. A device, an UAV (drone) per se, wants to send its location to our ground station. This can be achieved with a POST request to the specific ground station URL.
+
+```python
+json_tmp = {"id": uav_id, "lat": targetpos.lat, "lng": targetpos.lng, "alt": targetpos.alt, "ip": args.uav_ip + ':' + flask_port}
+
+r = requests.post(path_to_post, data=json_tmp)
+```
+
+Note that the device should attach, on the message, it's own IP and PORT, so our framework can send commands back to it. The specific URL, to receive POSTs, is mapped to a view. So, when the device send it's location on body's request, the post_to_socket view receive the request and extracts the information from it's body. We want to send this information to our interface and also to save it in the log file. Who is responsible for both actions is the PostConsumer, inside /connections/consumers_wrapper/post_consumer.py. This way, the post_to_socket view needs to send the message to PostConsumer, getting an instance of this class and calling this Class function receive_post(message).
+
+```python
+post_consumer_instance = get_post_consumer_instance()
+await post_consumer_instance.receive_post(new_dict)
+```
+
+Sending a message to an external device is also done by Consumers. When a command button is activated on the interface, the main.js uses the async method socket.send(), to transmit the command direct to the Consumer (back-end). The message received from the main.js, contains which device or group of devices it should be sent. It also contains the ID of the external devices that will receive the command. The first step is to search on the registered device's list for the address (IP) of the devices.
+
+```python
+device_to_send_list = get_device_from_list_by_id(device_receiver_id)
+```
+
+There is a list on config.ini mapping the commands code (integer) to a specific endpoint, that should be added to the IP+Port of the external device.
+
+```html
+[commands-list]
+20 = position_absolute_json,get
+22 = position_relative_json,get
+24 = auto,get
+26 = run_experiment,get
+28 = set_auto,get
+30 = rtl,get
+32 = takeoff_and_hold,get
+```
+
+The list contains the endpoint and the HTTP request type, if it is a GET or POST request.
+
+With the address complete, the command will be sent via HTTP request.
+
+```python
+command_path_list = config['commands-list'][command].split(',')
+endpoint = command_path_list[0]
+
+if command_path_list[1] == 'get':
+  #GET request
+  task = asyncio.create_task(self.send_get_specific_device(url, id, device['device']))
+else:
+  # POST request
+  task = asyncio.create_task(self.send_post_specific_device(url, json_to_send))
+self.async_tasks.append(task)
+```
+
+Depending on the type of the request, the command will be sent and an asynchronous task will be created.
+
+## Data persistence
+One of the main features of this project is the data persistence of every event that occurred during the experiments. Log files are generated, when starting the application, and filled in as messages are received, errors are caught, commands are sent, and other events that are of importance to the experiment.
+
+To generate the .log files, the logging package, for Python, is used. Inside /connections/utils/logger.py there is a class Logger, responsible for the persistent logic. It's possible to extend and copy this class to other modules, for example, at the uav_simulator/ module that has this class with different logic.
+
+When the server start, a .log file is created, inside the folder specified by the Logger's path variable, and the file's name is composed by the module name followed by the date created. The example above represents a .log file created inside the uav_simulator module at 25/01/2022 08:18:40.
+
+```html
+uav_simulator-2022-01-25-08-18-40.log
+```
+
+To fill this file, it must be inserted in code calls of the methods from the Logger class, according to it's needs. The example above includes the code from the PostConsumer class, inside the method to handle a external message received.
+
+```python
+logger.log_info(source=source, data=data, code_origin='receive-info')
+try:
+  await self.send(json.dumps(data)) # Send to JS via socket
+except Exception:
+  logger.log_except()
+```
+
+The logger object is global and already instantiated. Two log methods are called, to save the data received and to save the Exception caught when trying to send the message to the front-end via socket.
+
+The .log file format is specified inside the Logger class, using the syntax accepted by the Formatting class, form logging package. For more information on how to format the .log file, https://docs.python.org/3/library/logging.html#logging.Formatter.
+
+```html
+2021-12-12 20:58:32,706; uav-21; receive-info; {'id': 21, 'type': 102, 'seq': 30, 'lat': -15.840081, 'lng': -47.926642, 'alt': -0.03, 'device': 'uav', 'ip': 'http://127.0.0.1:5071/', 'method': 'post', 'time': '2021-12-12T20:58:32.706792', 'status': 'active'}
+
+2022-01-25 20:58:50,365; gs; send-get; http://127.0.0.1:5071/rtl
+```
+
+The example above has two messages, formatted with the date of the event, who triggered the event, where it was triggered and the message itself.
+
 ## Sequence Diagram
 The sequence message diagram below represents the messages flow between external devices and the main modules from this framework.
 
