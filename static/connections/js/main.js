@@ -109,11 +109,11 @@ function removeCommandOption(id) {
   }
 }
 
-function notifyUiWhenJsonSent(jsonSent) {
+function notifyUiWhenJsonSent(jsonSent, message="Command sent: ") {
   // Insert on interface visual log the command sent.
   var element = document.getElementById('actions-logs');
   var p = document.createElement("p");
-  p.appendChild(document.createTextNode("Command sent: " + jsonSent));
+  p.appendChild(document.createTextNode(message + jsonSent));
   p.className += "json-sent";
 
   element.prepend(p);
@@ -317,6 +317,7 @@ form.addEventListener('submit', (e) => {
   request.open("POST", url, true);
   
   request.send(data);
+  notifyUiWhenJsonSent("File uploaded successfully!", "")
   e.preventDefault();
 });
 
