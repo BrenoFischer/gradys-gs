@@ -305,6 +305,8 @@ document.querySelector('#upload').onclick = function(e) {
 
 var form = document.querySelector("form");
 form.addEventListener('submit', (e) => {
+  // Logic for submit button, to upload a file
+  // It will make a post request to the form 'action' address
   let data = new FormData();
   let fileInput = document.getElementById('upload');
   data.append("file", fileInput.files[0]);
@@ -320,6 +322,9 @@ form.addEventListener('submit', (e) => {
 
 var inputBtn = document.getElementById("upload");
 inputBtn.addEventListener('input', () => {
+  // Logic for the file submission button condition
+  // When the file button changes its state, it will be chekced the submit button condition
+  // If there is a file, the submite button is enabled. Otherwise, it'll be disabled
   let submitBtn = document.getElementById("submit-file");
   let submitLabel = document.getElementById("submit-label");
   let inputIcon = document.getElementById("input-icon");

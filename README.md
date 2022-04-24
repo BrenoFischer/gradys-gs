@@ -364,6 +364,7 @@ We can register a new button inside the template, create a onClick callback func
 ```html
 <input class="button" id="new-button" type="button" value="New Command">
 ```
+
 * Register an onclick function, in ***/static/connections/main.js***
 ```javascript
 var newCommandNumber = 40
@@ -385,6 +386,10 @@ function sendCommand(type) {
 <!--te-->
 Notice that the socket object must be instatiated already, and the connection 'OPEN'.
 The corresponding Consumer will receive the message and handle, acording to it's command type.
+
+A button can contain a different type, as checkbox. This button will have a different logic then a regular button. A specific thread will handle the command, repeating until the checkbox is unmarked. Marking a checkbox will result on the creation of a thread, unmarking it will cancel this thread. In order to create a checkbox button, you need to change the type to type="checkbox", on index.html, and pass the argument "checkbox" when creating a event handler on main.js: sendCommand(30, "checkbox");
+
+The button type will be insert inside the JSON message, sent by main.js to the corresponding Consumer. So the Consumer will know this is not a regular command, and will create or cancel a thread.
 
 ### Command button logic
 You already have a button on interface that sends a command, in this case '40', to a Consumer. This Consumer will be in charge to the command logic.
@@ -481,9 +486,11 @@ update_delay = 20
     ├── connections         # Main app folder
     ├── static              # Static js, css, images files
     ├── templates           # Files with template language (html)
+    ├── uav_simulator       # Logic to run Ardupilot SITL simulator 
     ├── config.ini          # Contains project's adjustable parameters
     ├── manage.py           # Django’s command-line utility for administrative tasks
-    ├── requeriments.txt    # Contains all packages and versions required
+    ├── requeriments.txt    # Contains all packages and versions required for Windows
+    ├── ´´_linux.txt        # Contains all packages and versions required for Linux
     └── README.md
 
 We will open the folders that require more attention:
