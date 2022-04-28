@@ -42,38 +42,19 @@
 
 import sys
 import argparse
-
-
-from pymavlink import mavutil
-
-import configparser
-import threading
 import atexit
-import requests
 
 # Import from inside project
 from utils.logger import Logger
-# from copter import Copter
 from copter_connection import get_copter_instance
 from args_manager import register_args
 from blueprints.send_cmds_to_uav import send_cmds_to_uav
 from blueprints.request_data_from_uav import request_data_from_uav
 
-
 from flask import Flask
-from flask import render_template
-from flask import jsonify #returns a json from a dict
-from flask import json
 from flask_cors import CORS
-#app = Flask(__name__)
-
-#######
-
-# Global Stuff
-copter = 0
 
 
-# arguments
 parser = argparse.ArgumentParser(
     description='Copy Common Files as needed, stripping out non-relevant wiki content',  
 )
@@ -100,140 +81,25 @@ register_args(args)
 
 __license__ = "GPLv3}"
 
-##########################
+print("Running MAIN!!!")
+copter = get_copter_instance(args)
+flask_port = str(5000 + int(str(args.uav_udp_port)[-2:]))
 
-#----------------------------------------------------------------------
-# Threading for flask 
-#
-POOL_TIME = 1 #Seconds
 
-# variables that are accessible from anywhere
-#commonDataStruct = {}
-# lock to control access to variable
-dataLock = threading.Lock()
-# thread handler
-droneThread = threading.Thread()
-
-# simple sequential int to check package loss
-seq = 0
+from flask_uav_functions import send_location_start, interrupt
 
 def create_app():
     global app
+    global flask_port
 
     app = Flask(__name__)
     CORS(app)
 
-
-    ##########################################################################
-    # Flask drone API
-
-    @app.route('/')
-    def hello_world():
-        return render_template('return.html', name='Hello, World! (index page)')    
-
-
-    @app.route('/hello/')
-    @app.route('/hello/<name>')
-    def hello(name=None):
-        return render_template('return.html', name=name)    
-
-    # @app.route('/connect')
-    # def flask_connect():
-    #     global copter
-    #     copter = Copter(sysid=int(config['master']['sysid']))
-    #     # Assume that we are connecting to SITL on udp 14550
-    #     copter.connect(connection_string=str(config['master']['connection_string']))
-    #     return render_template('return.html', name='connected')  
-
-    @app.route('/arm')
-    def flask_arm():
-        global copter
-        copter.change_mode("GUIDED")
-        copter.wait_ready_to_arm()
-
-        if not copter.armed():
-            copter.arm_vehicle()
-        if copter.armed():
-            return render_template('return.html', name='Vehicle armed')    
-        else:
-            return render_template('return.html', name='Vehicle ARMED armed')    
-
-    @app.route('/takeoff')
-    @app.route('/takeoff/<altitute>')
-    def flask_takeoff(altitute=10):
-        global copter
-        copter.user_takeoff(int(altitute))
-        return render_template('return.html', name='Ordered to takeoff to ' + str(altitute))    
-
-
-    @app.route('/rtl')
-    def flask_rtl():
-        global copter
-        copter.do_RTL()
-        return render_template('return.html', name='Ordered to takeoff to RTL') 
-
-
     app.register_blueprint(send_cmds_to_uav)
     app.register_blueprint(request_data_from_uav)
-    ##########################################################################
 
-
-    def interrupt():
-        global droneThread
-        droneThread.cancel()
-
-    def sendLocation():
-        global droneThread
-        global seq
-        global config_from_django
-        with dataLock:
-            #sample print('Safe print regardless race condition...')
-            global copter
-
-            # The groundstation address this uav will send information 
-            path_to_post = config_from_django['post']['ip'] + config_from_django['post']['path_receive_info']
-            targetpos = copter.mav.location(relative_alt=True)
-            uav_id = int(args.uav_sysid)
-            
-            # The real time coordinates of the UAV
-            json_tmp = {"id": uav_id, "lat": str(targetpos.lat), "lng": str(targetpos.lng), "alt": str(targetpos.alt)}
-            # The device type
-            json_tmp['device'] = 'uav'
-            # The type of message, in this case it represents location info message
-            json_tmp['type'] = config_from_django["internal-protocol"]["location_command"] 
-            # The sequential number to check package loss
-            json_tmp['seq'] = seq
-            seq += 1
-
-            if (args.uav_ip is None):
-                # In case there wasn't provided the UAV IP, the thread will stop and the instructions will show on terminal. 
-                print('\nNão foi informado o IP desse UAV...\nVerifique a execução do comando em /uav_simulator/run_uav.py:')
-                print('--uav_ip http://IP')
-                print('\nPressione CTRL+C para encerrar.')
-            else:
-                # This UAV address, so the GS can register and send specific commands back
-                json_tmp['ip'] = str(args.uav_ip) + ':' + flask_port + '/'
-
-                try:
-                    r = requests.post(path_to_post, data=json_tmp)
-                    print(r.status_code, r.reason)
-                    logger.log_info(r, f'uav-sim{uav_id}')
-                except:
-                    print('Erro ao enviar a informação. Logging...')
-                    logger.log_except()
-
-                # Set the next thread to happen
-                droneThread = threading.Timer(POOL_TIME, sendLocation, ())
-                droneThread.start()
-
-    def sendLocationStart():
-        global droneThread
-        droneThread = threading.Timer(POOL_TIME, sendLocation, ())
-        droneThread.start()
-
-
-    # Initiate
-    sendLocationStart()
+    # Initiate send location thread
+    send_location_start(flask_port)
     # When you kill Flask (SIGTERM), clear the trigger for the next thread
     atexit.register(interrupt)
     return app
@@ -244,20 +110,7 @@ if (args.uav_sysid == -1) or (args.uav_udp_port == -1):
     print("Bad parameters. Check uav_sysid and uav_udp_port")
     sys.exit(1)
 
-logger = Logger()
-# Reading the config.ini file 
-config_from_django = configparser.ConfigParser()
-config_from_django.read('../config.ini')
-
-print("Running MAIN!!!")
-copter = get_copter_instance(args)
-# copter = Copter(sysid=int(args.uav_sysid))
-# copter.connect(connection_string=str("udpin:127.0.0.1:" + str(args.uav_udp_port)))
-
-
 # to enable a task for pooling GS with its position
 app = create_app()  
 
-# run flask for any client and use port from parameters
-flask_port = str(5000 + int(str(args.uav_udp_port)[-2:]))
 app.run(host="0.0.0.0", port=flask_port)
