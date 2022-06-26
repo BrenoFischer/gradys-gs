@@ -46,10 +46,11 @@ import atexit
 
 # Import from inside project
 from utils.logger import Logger
-from copter_connection import get_copter_instance
-from args_manager import register_args
+from args_manager import get_args
 from blueprints.send_cmds_to_uav import send_cmds_to_uav
 from blueprints.request_data_from_uav import request_data_from_uav
+from copter_connection import get_copter_instance
+from flask_uav_functions import send_location_start, interrupt
 
 from flask import Flask
 from flask_cors import CORS
@@ -77,20 +78,18 @@ parser.add_argument(
 )
 
 args = parser.parse_args()
-register_args(args)
 
-__license__ = "GPLv3}"
+if (args.uav_sysid == -1) or (args.uav_udp_port == -1):
+    print("Bad parameters. Check uav_sysid and uav_udp_port")
+    sys.exit(1)
 
-print("Running MAIN!!!")
-copter = get_copter_instance(args)
-flask_port = str(5000 + int(str(args.uav_udp_port)[-2:]))
+# Register args from this file to the application
+get_args(args)
 
-
-from flask_uav_functions import send_location_start, interrupt
+#__license__ = "GPLv3}"
 
 def create_app():
     global app
-    global flask_port
 
     app = Flask(__name__)
     CORS(app)
@@ -98,19 +97,20 @@ def create_app():
     app.register_blueprint(send_cmds_to_uav)
     app.register_blueprint(request_data_from_uav)
 
-    # Initiate send location thread
-    send_location_start(flask_port)
-    # When you kill Flask (SIGTERM), clear the trigger for the next thread
-    atexit.register(interrupt)
     return app
 
 #----------------------------------------------------------------------
 
-if (args.uav_sysid == -1) or (args.uav_udp_port == -1):
-    print("Bad parameters. Check uav_sysid and uav_udp_port")
-    sys.exit(1)
+flask_port = str(5000 + int(str(args.uav_udp_port)[-2:]))
+print("Running MAIN!!!")
+copter = get_copter_instance(args)
 
 # to enable a task for pooling GS with its position
 app = create_app()  
+
+# Initiate a Copter instance and send location thread
+send_location_start(flask_port)
+# When you kill Flask (SIGTERM), clear the trigger for the next thread
+atexit.register(interrupt)
 
 app.run(host="0.0.0.0", port=flask_port)

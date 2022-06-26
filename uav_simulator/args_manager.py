@@ -1,10 +1,8 @@
 args = None
 
-def register_args(content):
+def get_args(content=None):
     global args
-    args = content
-
-def get_args():
-    global args
+    if args is None:
+        args = content
     return args
      

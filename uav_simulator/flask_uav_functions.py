@@ -6,18 +6,20 @@ from utils.logger import Logger
 from args_manager import get_args
 from copter_connection import get_copter_instance
 
-# lock to control access to variable
+# Lock to control access to variable
 data_lock = threading.Lock()
 
-# thread handler
+# Thread handler
 drone_thread = threading.Thread()
 
-# simple sequential int to check package loss
+# Simple sequential int to check package loss
 seq = 0
 flask_port = 0
 POOL_TIME = 1 #Seconds
-copter = get_copter_instance()
 
+copter = None
+
+# Util to help logging
 logger = Logger()
 # Reading the config.ini file 
 config_from_django = configparser.ConfigParser()
@@ -29,15 +31,16 @@ def interrupt():
     drone_thread.cancel()
 
 def send_location():
+    # Create a POST request with the information of the Copter instance (it needs to be already instantiated)
+    # and from the args from flask_uav.py (it needs to be already registred).
     global drone_thread
     global seq
     global config_from_django
     with data_lock:
-        #sample print('Safe print regardless race condition...')
         global copter
         global flask_port
         args = get_args()
-        print(args)
+        copter = get_copter_instance()
 
         # The groundstation address this uav will send information 
         path_to_post = config_from_django['post']['ip'] + config_from_django['post']['path_receive_info']
@@ -65,7 +68,6 @@ def send_location():
 
             try:
                 r = requests.post(path_to_post, data=json_tmp)
-                print(r.status_code, r.reason)
                 logger.log_info(r, f'uav-sim{uav_id}')
             except:
                 print('Erro ao enviar a informação. Logging...')
