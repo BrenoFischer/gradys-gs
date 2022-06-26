@@ -244,7 +244,7 @@ updateSocket.onclose = function(e) {
 // 20: /path_position_absolute
 // 22: /path_position_relative
 // 24: /auto
-// 26: /run_experiment
+// 26: /spiral
 // 28: /set_auto
 // 30: /set_rtl
 // 32: /takeoff_and_hold
@@ -260,7 +260,7 @@ document.querySelector('#auto').onclick = function(e) {
   sendCommand(24);
 };
 
-document.querySelector('#run-experiment').onclick = function(e) {
+document.querySelector('#spiral').onclick = function(e) {
   sendCommand(26);
 };
 
