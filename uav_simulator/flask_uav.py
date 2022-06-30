@@ -45,7 +45,6 @@ import argparse
 import atexit
 
 # Import from inside project
-from utils.logger import Logger
 from args_manager import get_args
 from blueprints.send_cmds_to_uav import send_cmds_to_uav
 from blueprints.request_data_from_uav import request_data_from_uav

@@ -52,7 +52,7 @@ def send_location():
         # The device type
         json_tmp['device'] = 'uav'
         # The type of message, in this case it represents location info message
-        json_tmp['type'] = config_from_django["internal-protocol"]["location_command"] 
+        json_tmp['type'] = config_from_django["internal-protocol"]["position_command"] 
         # The sequential number to check package loss
         json_tmp['seq'] = seq
         seq += 1
