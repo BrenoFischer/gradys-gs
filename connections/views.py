@@ -17,13 +17,13 @@ config.read('config.ini')
 def index(request):
   context = {
     'google_maps_key': settings.GOOGLE_MAPS_API_KEY,
-    'server_address': config['server']['ip']
+    'server_address': config['server']['ip_groundstation_server']
   }
   return render(request, 'index.html', context=context)
 
 
 def create_new_dict(request_received):
-  ip = config['post']['ip']
+  ip = config['uav-simulator']['ip_uav_server']
 
   new_dict = {}
   if request_received.POST.get('id') != None:
@@ -82,7 +82,7 @@ def send_uav_ip(request):
   
   device = get_device_from_list_by_id(id)
   if id == 'all':
-    ip = config['server']['ip']
+    ip = config['uav-simulator']['ip_uav_server']
   else:
     ip = device[0]['ip']
   

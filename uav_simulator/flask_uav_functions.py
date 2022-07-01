@@ -42,7 +42,7 @@ def send_location():
         logger = get_logger()
 
         # The groundstation address this uav will send information 
-        path_to_post = config_from_django['post']['ip'] + config_from_django['post']['path_receive_info']
+        path_to_post = config_from_django['server']['ip_groundstation_server'] + config_from_django['post']['path_receive_info']
         targetpos = copter.mav.location(relative_alt=True)
         uav_id = int(args.uav_sysid)
         

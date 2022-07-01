@@ -1,7 +1,7 @@
 // The IP+Port of the server is imported from config.ini. Django passes it as parameter to index.html, when it's rendered.
-// The IP+Port format is ip:port/
+// The IP+Port format is http://ip:port/
 // Striping the IP and Port:
-const serverIpPort = serverAddress.split(':');
+const serverIpPort = serverAddress.split(/http:\/\//)[1].split(':');
 const serverIp = serverIpPort[0];
 const serverPort = serverIpPort[1].slice(0, -1);
 
@@ -280,7 +280,7 @@ document.querySelector('#takeoff-and-hold').onclick = function(e) {
 document.querySelector('#upload').onclick = function(e) {
   // This is the button to upload a file. It will mantain the file, sending to the correct uav via POST Request, when Submit button is pressed
   // This button will trigger the GET Request to obtain the correct uav IP, based on the ID. The 'action' field, on form, will be replaced with the correct IP
-  const url = "http://" + serverAddress + "get-uav-ip/";
+  const url = serverAddress + "get-uav-ip/";
   const id = getDeviceReceiver();
   const data = {'id': id};
   let form = document.getElementById('form');
