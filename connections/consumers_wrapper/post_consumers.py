@@ -81,7 +81,7 @@ class PostConsumer(AsyncWebsocketConsumer):
         # Get the specific command path of the endpoint address
         command_path_list = config['commands-list'][str(command)].split(',')
         endpoint = command_path_list[0]
-        url = device['ip'] + endpoint
+        url = "http://" + device['ip'] + endpoint
 
         # Create the GET request task
         task = asyncio.create_task(self.send_get_specific_device(url, device['id'], device['device']))
@@ -104,7 +104,9 @@ class PostConsumer(AsyncWebsocketConsumer):
 
 
   async def send_via_http(self, text_data):
-    # The command received via socket will be processed 
+    # The command received via socket will be processed
+    # There is two types of command, trigged by a checkbox button and a regular button
+    # The button type will be checked and treated accordingly 
     received_json = json.loads(text_data)
 
     button_type = received_json['button_type']
@@ -115,22 +117,30 @@ class PostConsumer(AsyncWebsocketConsumer):
     # Or get all persistent list if device_receiver_id is 'all'.
     device_to_send_list = get_device_from_list_by_id(device_receiver_id)
 
-    # Checkbox commands are treat differently
+    
     if button_type == "checkbox":
+      # Checkbox commands are treat differently. treat_checkbox_cmds() have the logic to handle it
       await self.treat_checkbox_cmds(int(command))
     else:
+      # Regular button commands can be a POST or GET request
+      # The mapping is done inside congig.ini, where it gets the command (int) and returns endpoint,type_of_request (string)
       for device in device_to_send_list:
-        ip = device['ip']
+        # Building the device ip to send the HTTP request
+        ip = "http://" + device['ip']
         id = str(device['id'])
+
+        # Getting inside config.ini the "endpoint,type_of_request", based on the command (int)
         command_path_list = config['commands-list'][command].split(',')
         endpoint = command_path_list[0]
+        type_of_request = command_path_list[1]
         url = ip + endpoint
+        
         # Json_to_send will have the correct id in the 'id' field
         json_to_send = replicate_dict_new_id(id, received_json)
         # Insert device_type in json_to_send
         json_to_send['device'] = device['device']
 
-        if command_path_list[1] == 'get':
+        if type_of_request == 'get':
           #GET request
           task = asyncio.create_task(self.send_get_specific_device(url, id, device['device']))
         else:

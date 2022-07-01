@@ -28,6 +28,6 @@ ip = s.getsockname()[0]
 
 # Run uav flask servers 
 for i in range(uav_qt):
-    cmd_line = f'python3 flask_uav.py --uav_sysid 2{i+1} --uav_udp_port 1717{i+1} --uav_ip http://{ip}'
+    cmd_line = f'python3 flask_uav.py --uav_sysid 2{i+1} --uav_udp_port 1717{i+1} --uav_ip {ip}'
     os.system(cmd_line)
     time.sleep(delay)
