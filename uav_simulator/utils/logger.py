@@ -8,7 +8,7 @@ class Logger():
 
     log_file = path + f'{logging_for}-{time_now}.log'
     self.logger_except = self.setup_logger('log_exception', log_file, '%(lineno)d: %(asctime)s %(message)s', level=logging.ERROR)
-    self.logger_info = self.setup_logger('log_info', log_file, '%(asctime)s;%(message)s', level=logging.INFO)
+    self.logger_info = self.setup_logger('log_info', log_file, '%(message)s', level=logging.INFO)
 
 
   def setup_logger(self, name, log_file, my_format, level=logging.INFO):
@@ -22,9 +22,12 @@ class Logger():
 
     return lo
 
-  def log_info(self, data, source):
+  def log_info(self, source=None, data=''):
     if self.logger_info != None:
-      self.logger_info.info(f'{source};{data}')
+      if source != None:
+        self.logger_info.info(f'{source}; {data}')
+      else:
+        self.logger_info.info(f'{data}')
 
   def log_except(self):
     if self.logger_except != None:

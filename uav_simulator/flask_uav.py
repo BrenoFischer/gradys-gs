@@ -45,10 +45,9 @@ import argparse
 import atexit
 
 # Import from inside project
-from args_manager import get_args
+from flask_uav_global_variables import get_args, get_copter_instance, get_logger, get_flask_port
 from blueprints.send_cmds_to_uav import send_cmds_to_uav
 from blueprints.request_data_from_uav import request_data_from_uav
-from copter_connection import get_copter_instance
 from flask_uav_functions import send_location_start, interrupt
 
 from flask import Flask
@@ -100,15 +99,21 @@ def create_app():
 
 #----------------------------------------------------------------------
 
-flask_port = str(5000 + int(str(args.uav_udp_port)[-2:]))
+# Util to help logging
+logger = get_logger()
+
+flask_port = get_flask_port(str(5000 + int(str(args.uav_udp_port)[-2:])))
+
 print("Running MAIN!!!")
+logger.log_info(f'Starting drone {args.uav_sysid} on {args.uav_ip}:{flask_port}...')
 copter = get_copter_instance(args)
+logger.log_info(f'Drone {args.uav_sysid} connected on {args.uav_ip}:{flask_port}.')
 
 # to enable a task for pooling GS with its position
 app = create_app()  
 
 # Initiate a Copter instance and send location thread
-send_location_start(flask_port)
+send_location_start()
 # When you kill Flask (SIGTERM), clear the trigger for the next thread
 atexit.register(interrupt)
 

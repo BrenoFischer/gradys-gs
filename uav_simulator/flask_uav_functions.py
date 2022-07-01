@@ -2,9 +2,7 @@ import threading
 import configparser
 import requests
 
-from utils.logger import Logger
-from args_manager import get_args
-from copter_connection import get_copter_instance
+from flask_uav_global_variables import get_args, get_copter_instance, get_logger, get_flask_port
 
 # Lock to control access to variable
 data_lock = threading.Lock()
@@ -14,13 +12,11 @@ drone_thread = threading.Thread()
 
 # Simple sequential int to check package loss
 seq = 0
-flask_port = 0
-POOL_TIME = 1 #Seconds
-
+SEND_LOCATION_INTERVAL = 1 #Seconds
+flask_port = None
 copter = None
+logger = None
 
-# Util to help logging
-logger = Logger()
 # Reading the config.ini file 
 config_from_django = configparser.ConfigParser()
 config_from_django.read('../config.ini')
@@ -39,8 +35,11 @@ def send_location():
     with data_lock:
         global copter
         global flask_port
+        global logger
         args = get_args()
+        flask_port = get_flask_port()
         copter = get_copter_instance()
+        logger = get_logger()
 
         # The groundstation address this uav will send information 
         path_to_post = config_from_django['post']['ip'] + config_from_django['post']['path_receive_info']
@@ -67,20 +66,19 @@ def send_location():
             json_tmp['ip'] = str(args.uav_ip) + ':' + flask_port + '/'
 
             try:
+                logger.log_info(f'Sending POST request with location to the groundstation on {path_to_post}: {json_tmp}')
                 r = requests.post(path_to_post, data=json_tmp)
-                logger.log_info(r, f'uav-sim{uav_id}')
+                logger.log_info(f'Response from the groundstation: {r}')
             except:
-                print('Erro ao enviar a informação. Logging...')
+                print('Error sending location to groundstation. Logging...')
                 logger.log_except()
 
             # Set the next thread to happen
-            drone_thread = threading.Timer(POOL_TIME, send_location, ())
+            drone_thread = threading.Timer(SEND_LOCATION_INTERVAL, send_location, ())
             drone_thread.start()
 
-def send_location_start(f_port):
+def send_location_start():
     global drone_thread
-    global flask_port
 
-    flask_port = f_port
-    drone_thread = threading.Timer(POOL_TIME, send_location, ())
+    drone_thread = threading.Timer(SEND_LOCATION_INTERVAL, send_location, ())
     drone_thread.start()
