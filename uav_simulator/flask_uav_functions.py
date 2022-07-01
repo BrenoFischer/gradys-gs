@@ -58,6 +58,7 @@ def send_location():
 
         if (args.uav_ip is None):
             # In case there wasn't provided the UAV IP, the thread will stop and the instructions will show on terminal. 
+            logger.log_info(f'Drone {args.uav_sysid}', f'There wasnt informed the IP from this UAV...\nVerify the command execution inside /uav_simulator/run_uav.py, the following parameter define the UAV IP: --uav_ip IP')
             print('\nNão foi informado o IP desse UAV...\nVerifique a execução do comando em /uav_simulator/run_uav.py:')
             print('--uav_ip http://IP')
             print('\nPressione CTRL+C para encerrar.')
@@ -66,9 +67,9 @@ def send_location():
             json_tmp['ip'] = str(args.uav_ip) + ':' + flask_port + '/'
 
             try:
-                logger.log_info(f'Sending POST request with location to the groundstation on {path_to_post}: {json_tmp}')
+                logger.log_info(f'Drone {args.uav_sysid}', f'Sending POST request with location to the groundstation on {path_to_post}: {json_tmp}')
                 r = requests.post(path_to_post, data=json_tmp)
-                logger.log_info(f'Response from the groundstation: {r}')
+                logger.log_info(f'Drone {args.uav_sysid}', f'Response from the groundstation: {r}')
             except:
                 print('Error sending location to groundstation. Logging...')
                 logger.log_except()

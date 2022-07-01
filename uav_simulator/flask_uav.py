@@ -105,9 +105,9 @@ logger = get_logger()
 flask_port = get_flask_port(str(5000 + int(str(args.uav_udp_port)[-2:])))
 
 print("Running MAIN!!!")
-logger.log_info(f'Starting drone {args.uav_sysid} on {args.uav_ip}:{flask_port}...')
+logger.log_info(f'Drone {args.uav_sysid}', f'Starting drone {args.uav_sysid} on {args.uav_ip}:{flask_port}...')
 copter = get_copter_instance(args)
-logger.log_info(f'Drone {args.uav_sysid} connected on {args.uav_ip}:{flask_port}.')
+logger.log_info(f'Drone {args.uav_sysid}', f'Drone {args.uav_sysid} connected on {args.uav_ip}:{flask_port}.')
 
 # to enable a task for pooling GS with its position
 app = create_app()  
