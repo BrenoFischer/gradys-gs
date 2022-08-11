@@ -6,6 +6,8 @@ This is a repository for the Ground Station framework, developed for the GrADyS 
 
 ![Main showcase](/readme_images/mainShowcase.gif)
 
+![Main showcase 2](/readme_images/mainShowcaseNew.gif)
+
 # Installation
 ## Prerequisites
 In order to use the components in this repository, you need to have Python 3.0 or higher installed. Also pip, a Python package manager, is recomended to manage and automatically install the required packages of this project. 
@@ -98,12 +100,20 @@ Now you should be able to connect to the home page, acessing, on your browser, t
 
 
 # Project Architecture and customization
-Gradys Ground Station is structured following the classic concept of web development, with Front-end module, responsible for the interface and visualization, and Back-end module, responsible for server-side information processing. Front-end is built with Javascript language, HTML, or [Template language](https://docs.djangoproject.com/en/3.2/ref/templates/language/) from Django, and Cascading Style Sheets (CSS) language. Back-end is mainly built with Python language, using [Django Framework](https://www.djangoproject.com/).
+
+Gradys-gs's architecture was designed to make it adaptable and customizable to different needs. The functionalities are modularized, helping to customize and insert new elements, such as command buttons and communication protocols with IoT devices. Gradys Ground Station is structured following the classic concept of web development, with Front-end module, responsible for the interface and visualization, and Back-end module, responsible for server-side information processing.
+
+The project's back-end module was built using the Python programming language, together with the use of [Django Framework](https://www.djangoproject.com/), a tool written in Python, for the agile development of a web application. This framework provides an easy-to-configure development server, a simple and extensible URL route mapping, and a highly modular architecture.
+
+The front-end module was built using HyperText Markup Language (HTML) or [Template language](https://docs.djangoproject.com/en/3.2/ref/templates/language/), the Cascade Style styling language Sheets (CSS) and the most popular programming language in use, Javascript.
+<br>
+The technologies mentioned were chosen due to their wide use and popularity, contributing to a framework with more extensible usability. Python and Javascript programming languages ​​also have a vast set of libraries and packages, reflecting an extensive community.
+<br>
 Both modules comunicate with each other via WebSocket channels. A socket connection is a dedicated full-duplex channel based in the Transmission Control Protocol (TCP). This project uses [Django Channels](https://channels.readthedocs.io/en/stable/) library to handle WebSockets communication.
 
 ![Project Architecture](/readme_images/architecture.png)
 
-The main project architecture are represented with the two main modules, front-end and back-end. They communicate with each other after establishing a websocket connection, exchanging JSONs. The submodule, containing javascript files, start the socket connection with a route stated inside Django Channels submodule.
+As shown in Figure above, external devices can send messages to FlexStation via the Connections sub-module. The information processing is done in the Django Channels submodule, also responsible for passing the information to the interface, through an already established WebSocket connection. Messages exchanged between the frontend and backend modules follow the JSON format. Note that the described path, from the external device to the interface, is also possible in reverse, when a command is activated on the interface.
 <br>
 The information gate of the ground station to external devices is through Connections submodule, which constains the routes and logic to receive/send information.
 
